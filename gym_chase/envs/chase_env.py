@@ -121,37 +121,51 @@ class ChaseEnv(discrete.DiscreteEnv):
     
     metadata = {'render.modes': ['human']}
     
-    #def __init__(self):
-   
-def test_init:
-    shape = (20, 20)
-    arena, r_pos, p_pos = generate_arena()
-    
-    nS = (shape[0]-2) * (shape[1]-2) * 4
-    nA = 9
-    
-    arena_vec = arena.ravel()
+    def __init__(self):
+        self.shape = (20, 20)
+        self.arena, self.r_pos, self.p_pos = generate_arena()
+        
+        self.nS = (self.shape[0]-2) * (self.shape[1]-2) * 4
+        self.nA = 9
+        
+        # Thinking I should take this out - it's up to the agent to work
+        # out what it wants to do with the state. I shouldn't assume the 
+        # agent wants it back as a 1D vector.
+        self.arena_vec = self.arena.ravel()
 
         
         
-        def step(self, action):
-        ...
-        def reset(self):
-        ...
-def test_render(self, mode='human'):
-    arena, r_pos, p_pos = generate_arena()
-    outfile = sys.stdout
-   
-    arena_human = np.array2string(arena)
-    arena_human = np.char.replace(arena_human, '0.', ' ')
-    arena_human = np.char.replace(arena_human, '1.', 'X')
-    arena_human = np.char.replace(arena_human, '2.', 'X')
-    arena_human = np.char.replace(arena_human, '3.', 'R')
-    arena_human = np.char.replace(arena_human, '4.', 'A')
-    
-    output = ''.join(arena_human.ravel())
-    
-    outfile.write(output)
+    def step(self, action):
+        return
+
+    def reset(self):
+        self.arena, self.r_pos, self.p_pos = generate_arena()
+        return
+
+
+    def render(self, mode='human'):
+        outfile = sys.stdout
+       
+        arena_human = np.array2string(self.arena)
+        arena_human = np.char.replace(arena_human, '0.', ' ')
+        arena_human = np.char.replace(arena_human, '1.', 'X')
+        arena_human = np.char.replace(arena_human, '2.', 'X')
+        arena_human = np.char.replace(arena_human, '3.', 'R')
+        arena_human = np.char.replace(arena_human, '4.', 'A')
+        
+        output = ''.join(arena_human.ravel())
+        
+        outfile.write(output)
     
 
-    
+# Testing...
+
+env = ChaseEnv()    
+
+env.render()
+
+print("Resetting... \n")
+
+env.reset()
+
+env.render()
