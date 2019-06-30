@@ -123,7 +123,7 @@ class ChaseEnv(discrete.DiscreteEnv):
     
     def __init__(self):
         self.shape = (20, 20)
-        self.arena, self.r_pos, self.p_pos = generate_arena()
+        self.arena, self.r_pos, self.a_pos = generate_arena()
         
         self.nS = (self.shape[0]-2) * (self.shape[1]-2) * 4
         self.nA = 9
@@ -136,10 +136,98 @@ class ChaseEnv(discrete.DiscreteEnv):
         
         
     def step(self, action):
-        return
+        r = 0
+        a_pos = self.a_pos
+        r_pos = self.r_pos
+        done = False
+        
+        if action == '7':
+            # Move North West.
+            a_move = [1, -1]    
+        elif action == '8':
+            # Move North.
+            a_move = [1, 0]
+        elif action == '9':
+            # Move North East.
+            a_move = [1, 1]
+        elif action == '6':
+            # Move East.
+            a_move = [0, 1]
+        elif action == '3':
+            # Move South East.
+            a_move = [-1, 1]
+        elif action == '2':
+            # Move South.
+            a_move = [-1, 0]
+        elif action == '1':
+            # Move South West.
+            a_move = [-1, -1]
+        elif action == '4':
+            # Move West.
+            a_move = [0, -1]            
+        elif action == '5':
+            # If I stay still maybe they won't see me!
+            a_move = [0, 0]
+        else: # Should not get here - treat as no move.
+            a_move = [0, 0]
+            
+        # assess the move
+        if self.arena[a_pos[0] + a_move[0]][a_pos[1] + a_move[1]] in [1, 2, 3]:
+            # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
+            done = True
+        
+        # Move agent (vacate location and set new location).
+        self.arena[a_pos[0]][a_pos[1]] = 0
+        self.arena[a_pos[0] + a_move[0]][a_pos[1] + a_move[1]] = 4
+        a_pos[0] += a_move[0]
+        a_pos[1] += a_move[1]
+        
+        # Robots turn!
+        robot = 0
+        while robot < len(r_pos):
+            # Which way to the player?
+            tar_x, tar_y = a_pos[0] - r_pos[robot][0], a_pos[1] - r_pos[robot][1]            
+            
+            if abs(tar_x) == abs(tar_y): 
+                r_move = [np.sign(tar_x), np.sign(tar_y)]
+            elif abs(tar_x) > abs(tar_y):
+                r_move = [np.sign(tar_x), 0]
+            else:
+                r_move = [0, np.sign(tar_y)]
+
+            # Check to make sure robots don't move on top of each other.
+            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] == 3:
+                r_move = [0, 0]
+            
+            # Has robot caught the player?
+            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] == 4:
+                # ZZZAAAAPPPPP!!!! - Agent was caught by a robot.
+                done = True
+            
+            # Check if robot done something stupid otherwise update position.
+            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] in [1, 2]:
+                if len(r_pos)-1 == 0:
+                    self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
+                    # ZZZAAAAPPPPP!!!! - All robots gone. Agent wins.
+                    r += 1
+                    done = True
+                else:
+                    # ZZZAAAAPPPPP!!!! - Fried robot.
+                    self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
+                    del r_pos[robot]   
+                    r += 1
+            else: # Update robot position
+                self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
+                self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] = 3
+                r_pos[robot][0] += r_move[0]
+                r_pos[robot][1] += r_move[1]
+            
+            robot += 1
+                
+        return self.arena, r, done
 
     def reset(self):
-        self.arena, self.r_pos, self.p_pos = generate_arena()
+        self.arena, self.r_pos, self.a_pos = generate_arena()
         return
 
 
@@ -162,10 +250,13 @@ class ChaseEnv(discrete.DiscreteEnv):
 
 env = ChaseEnv()    
 
-env.render()
-
-print("Resetting... \n")
-
-env.reset()
+done = False
 
 env.render()
+
+while not done:
+    move = input('\nYour move [1-9 move, 5 stay still]:')
+    _, r, done = env.step(move)
+    env.render()
+    print('\nReward:', r)
+    
