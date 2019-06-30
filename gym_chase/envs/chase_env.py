@@ -130,7 +130,7 @@ class ChaseEnv(discrete.DiscreteEnv):
         
         # Thinking I should take this out - it's up to the agent to work
         # out what it wants to do with the state. I shouldn't assume the 
-        # agent wants it back as a 1D vector.
+        # agent wants a 1D vector.
         self.arena_vec = self.arena.ravel()
 
         
@@ -143,25 +143,25 @@ class ChaseEnv(discrete.DiscreteEnv):
         
         if action == '7':
             # Move North West.
-            a_move = [1, -1]    
+            a_move = [-1, -1]    
         elif action == '8':
             # Move North.
-            a_move = [1, 0]
+            a_move = [-1, 0]
         elif action == '9':
             # Move North East.
-            a_move = [1, 1]
+            a_move = [-1, 1]
         elif action == '6':
             # Move East.
             a_move = [0, 1]
         elif action == '3':
             # Move South East.
-            a_move = [-1, 1]
+            a_move = [1, 1]
         elif action == '2':
             # Move South.
-            a_move = [-1, 0]
+            a_move = [1, 0]
         elif action == '1':
             # Move South West.
-            a_move = [-1, -1]
+            a_move = [1, -1]
         elif action == '4':
             # Move West.
             a_move = [0, -1]            
@@ -244,19 +244,3 @@ class ChaseEnv(discrete.DiscreteEnv):
         output = ''.join(arena_human.ravel())
         
         outfile.write(output)
-    
-
-# Testing...
-
-env = ChaseEnv()    
-
-done = False
-
-env.render()
-
-while not done:
-    move = input('\nYour move [1-9 move, 5 stay still]:')
-    _, r, done = env.step(move)
-    env.render()
-    print('\nReward:', r)
-    
