@@ -47,13 +47,13 @@ def generate_arena(robots=5, random_seed=0):
 
     return arena, r_pos, a_pos
 
-    def look(arena, loc, tar):
-        return arena[loc[0] + tar[0]][loc[1] + tar[1]]        
+def look(arena, loc, tar):
+    return arena[loc[0] + tar[0]][loc[1] + tar[1]]        
 
-    def move(arena, loc, tar, element):
-        arena[loc[0]][loc[1]] = 0
-        arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
-        return
+def move(arena, loc, tar, element):
+    arena[loc[0]][loc[1]] = 0
+    arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
+    return
 
 class ChaseEnv(discrete.DiscreteEnv):
     """
