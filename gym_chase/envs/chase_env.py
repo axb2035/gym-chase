@@ -6,15 +6,6 @@ from gym.envs.toy_text import discrete
 import numpy as np
 import random
 
-SW = 1
-S = 2
-SE = 3
-W = 4
-NM = 5
-E = 6
-NW = 7
-N = 8
-NE = 9
 
 def generate_arena(robots=5, random_seed=0):
     random.seed(random_seed)
@@ -55,6 +46,7 @@ def generate_arena(robots=5, random_seed=0):
             a_pos = [a_x, a_y]
 
     return arena, r_pos, a_pos
+
 
 class ChaseEnv(discrete.DiscreteEnv):
     """
@@ -127,14 +119,15 @@ class ChaseEnv(discrete.DiscreteEnv):
         
         self.nS = (self.shape[0]-2) * (self.shape[1]-2) * 4
         self.nA = 9
-        
-        # Thinking I should take this out - it's up to the agent to work
-        # out what it wants to do with the state. I shouldn't assume the 
-        # agent wants a 1D vector.
-        self.arena_vec = self.arena.ravel()
+    
+    def look(self, loc, tar):
+        return self.arena[loc[0] + tar[0]][loc[1] + tar[1]]        
 
-        
-        
+    def move(self, loc, tar, element):
+        self.arena[loc[0]][loc[1]] = 0
+        self.arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
+        return
+    
     def step(self, action):
         r = 0
         a_pos = self.a_pos
@@ -172,13 +165,15 @@ class ChaseEnv(discrete.DiscreteEnv):
             a_move = [0, 0]
             
         # assess the move
-        if self.arena[a_pos[0] + a_move[0]][a_pos[1] + a_move[1]] in [1, 2, 3]:
+        if env.look(a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
+            self.arena[a_pos[0]][a_pos[1]] = 0
             done = True
-        
-        # Move agent (vacate location and set new location).
-        self.arena[a_pos[0]][a_pos[1]] = 0
-        self.arena[a_pos[0] + a_move[0]][a_pos[1] + a_move[1]] = 4
+        else:
+            # Move agent (vacate location and set new location).
+            env.move(a_pos, a_move, element=4)
+
+        # Even if zapped, need to update agent for possible pyhrric reward.
         a_pos[0] += a_move[0]
         a_pos[1] += a_move[1]
         
@@ -195,17 +190,19 @@ class ChaseEnv(discrete.DiscreteEnv):
             else:
                 r_move = [0, np.sign(tar_y)]
 
+            tar_look = env.look(r_pos[robot], r_move)
+            
             # Check to make sure robots don't move on top of each other.
-            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] == 3:
+            if tar_look == 3:
                 r_move = [0, 0]
             
             # Has robot caught the player?
-            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] == 4:
+            if tar_look == 4:
                 # ZZZAAAAPPPPP!!!! - Agent was caught by a robot.
                 done = True
             
             # Check if robot done something stupid otherwise update position.
-            if self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] in [1, 2]:
+            if tar_look in [1, 2]:
                 if len(r_pos)-1 == 0:
                     self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
                     # ZZZAAAAPPPPP!!!! - All robots gone. Agent wins.
@@ -217,8 +214,7 @@ class ChaseEnv(discrete.DiscreteEnv):
                     del r_pos[robot]   
                     r += 1
             else: # Update robot position
-                self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
-                self.arena[r_pos[robot][0] + r_move[0]][r_pos[robot][1] + r_move[1]] = 3
+                env.move(r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
             
@@ -235,12 +231,15 @@ class ChaseEnv(discrete.DiscreteEnv):
         outfile = sys.stdout
        
         arena_human = np.array2string(self.arena)
+        
         arena_human = np.char.replace(arena_human, '0.', ' ')
         arena_human = np.char.replace(arena_human, '1.', 'X')
         arena_human = np.char.replace(arena_human, '2.', 'X')
         arena_human = np.char.replace(arena_human, '3.', 'R')
         arena_human = np.char.replace(arena_human, '4.', 'A')
+        arena_human = np.char.replace(arena_human, '[', '')
+        arena_human = np.char.replace(arena_human, ']', '')
         
-        output = ''.join(arena_human.ravel())
-        
+        output = ' ' + '\n'.join(arena_human.ravel())
+
         outfile.write(output)
