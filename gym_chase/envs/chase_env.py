@@ -47,6 +47,13 @@ def generate_arena(robots=5, random_seed=0):
 
     return arena, r_pos, a_pos
 
+    def look(arena, loc, tar):
+        return arena[loc[0] + tar[0]][loc[1] + tar[1]]        
+
+    def move(arena, loc, tar, element):
+        arena[loc[0]][loc[1]] = 0
+        arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
+        return
 
 class ChaseEnv(discrete.DiscreteEnv):
     """
@@ -119,15 +126,7 @@ class ChaseEnv(discrete.DiscreteEnv):
         
         self.nS = (self.shape[0]-2) * (self.shape[1]-2) * 4
         self.nA = 9
-    
-    def look(self, loc, tar):
-        return self.arena[loc[0] + tar[0]][loc[1] + tar[1]]        
-
-    def move(self, loc, tar, element):
-        self.arena[loc[0]][loc[1]] = 0
-        self.arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
-        return
-    
+      
     def step(self, action):
         r = 0
         a_pos = self.a_pos
@@ -165,13 +164,13 @@ class ChaseEnv(discrete.DiscreteEnv):
             a_move = [0, 0]
             
         # assess the move
-        if env.look(a_pos, a_move) in [1, 2, 3]:
+        if look(self.arena, a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
             self.arena[a_pos[0]][a_pos[1]] = 0
             done = True
         else:
             # Move agent (vacate location and set new location).
-            env.move(a_pos, a_move, element=4)
+            move(self.arena, a_pos, a_move, element=4)
 
         # Even if zapped, need to update agent for possible pyhrric reward.
         a_pos[0] += a_move[0]
@@ -190,7 +189,7 @@ class ChaseEnv(discrete.DiscreteEnv):
             else:
                 r_move = [0, np.sign(tar_y)]
 
-            tar_look = env.look(r_pos[robot], r_move)
+            tar_look = look(self.arena, r_pos[robot], r_move)
             
             # Check to make sure robots don't move on top of each other.
             if tar_look == 3:
@@ -214,7 +213,7 @@ class ChaseEnv(discrete.DiscreteEnv):
                     del r_pos[robot]   
                     r += 1
             else: # Update robot position
-                env.move(r_pos[robot], r_move, element=3)
+                move(self.arena, r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
             
@@ -225,7 +224,6 @@ class ChaseEnv(discrete.DiscreteEnv):
     def reset(self):
         self.arena, self.r_pos, self.a_pos = generate_arena()
         return
-
 
     def render(self, mode='human'):
         outfile = sys.stdout
