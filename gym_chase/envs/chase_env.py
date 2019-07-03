@@ -1,7 +1,7 @@
 import sys
 
-from gym import utils
-from gym.envs.toy_text import discrete
+import gym
+from gym import spaces
 
 import numpy as np
 import random
@@ -55,7 +55,7 @@ def move(arena, loc, tar, element):
     arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
     return
 
-class ChaseEnv(discrete.DiscreteEnv):
+class ChaseEnv(gym.Env):
     """
     Chase is based on a text game first created in the 1970's and featured
     in a number of 80s personal computer programming books.
@@ -65,16 +65,17 @@ class ChaseEnv(discrete.DiscreteEnv):
     a zapper (either by moving to an outside edge of arena or into a free 
     standing one) it is eliminated and the epsisode ends.
     
+    Each step an agent can move horiziontally one square, vertically one 
+    square, a combination of one vertcal and horiziontal square or not move.
+    This gives the agent nine possible actions per step.
+    
     Besides the zappers there are also five robots which move towards the
     agent each step. The robots have no self-preservation instincts and will
     move into a zapper in an attempt to get closer to the agent. If a robot 
     moves into the same square as the agent the agent is eliminated and the
     episode ends. If a robot wants to move to a square which is occupied
-    by another robot it will not move.
-    
-    Each step an agent can move horiziontally one square, vertically one 
-    square, a combination of one vertcal and horiziontal square or not move.
-    This gives the agent nine possible actions per step.
+    by another robot it will not move. If the agent moves into a zapper the
+    robots will still move completing the 'step'.    
     
     An example map looks like this:
         
@@ -113,20 +114,18 @@ class ChaseEnv(discrete.DiscreteEnv):
         - the agent is eliminated by a robot moving into the agent; or
         - all robots are eliminated.
         
-    The agent receives a reward of 1 for each robot eliminated and zero 
-    otherwise.
+    The agent receives a reward of 1 for each robot eliminated, -1 if the agent
+    is eliminated and zero otherwise.
 
     """
     
     metadata = {'render.modes': ['human']}
-    
+  
     def __init__(self):
-        self.shape = (20, 20)
-        self.arena, self.r_pos, self.a_pos = generate_arena()
-        
-        self.nS = (self.shape[0]-2) * (self.shape[1]-2) * 4
-        self.nA = 9
+        self.observation_space = spaces.Box(low=0, high=4, shape=(20, 20), dtype=np.uint8)
+        self.action_space = 9
       
+        
     def step(self, action):
         r = 0
         a_pos = self.a_pos
@@ -167,6 +166,7 @@ class ChaseEnv(discrete.DiscreteEnv):
         if look(self.arena, a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
             self.arena[a_pos[0]][a_pos[1]] = 0
+            r -= 1
             done = True
         else:
             # Move agent (vacate location and set new location).
@@ -198,6 +198,7 @@ class ChaseEnv(discrete.DiscreteEnv):
             # Has robot caught the player?
             if tar_look == 4:
                 # ZZZAAAAPPPPP!!!! - Agent was caught by a robot.
+                r -= 1
                 done = True
             
             # Check if robot done something stupid otherwise update position.
@@ -221,8 +222,8 @@ class ChaseEnv(discrete.DiscreteEnv):
                 
         return self.arena, r, done
 
-    def reset(self):
-        self.arena, self.r_pos, self.a_pos = generate_arena()
+    def reset(self, random_seed=0):
+        self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=random_seed)
         return
 
     def render(self, mode='human'):
