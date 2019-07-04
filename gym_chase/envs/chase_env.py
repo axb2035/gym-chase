@@ -224,7 +224,7 @@ class ChaseEnv(gym.Env):
 
     def reset(self, random_seed=0):
         self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=random_seed)
-        return
+        return self.arena
 
     def render(self, mode='human'):
         outfile = sys.stdout
