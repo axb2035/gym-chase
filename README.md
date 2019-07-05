@@ -78,7 +78,7 @@ When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
 a different starting position:
 ```
-env.reset(random_seed=![equation](http://latex.codecogs.com/svg.latex?n))
+env.reset(random_seed=```![equation](http://latex.codecogs.com/svg.latex?n)```)
 ```
 
 ## Future expansion
@@ -91,6 +91,7 @@ the left or right of the 'deterministic' move to close the gap on the agent.
 - Reinstate the original 'Jump' function where you would be transported to a 
 random square when the agent had no hope of winning. Though this could land the
 agent on a robot or zapper so it wasn't a gaurenteed escape plan!
+- Reinstate that robots moving into each other are both eliminated.
 - Any improvments in coding that are suggested.
 
 ## Thanks to:
