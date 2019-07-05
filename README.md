@@ -33,7 +33,7 @@ by another robot it will not move. If the agent moves into a zapper the
 robots will still move completing the 'step'.    
 
 An example map looks like this:
-
+```
 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
 1. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
@@ -54,7 +54,7 @@ An example map looks like this:
 1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 1.
 1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
-
+```
 1. Boundary zapper
 2. Random zapper
 3. Robot
@@ -78,7 +78,7 @@ When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
 a new starting arena:
 ```
-env.reset(random_seed=*n*)
+env.reset(random_seed=![equation](https://www.codecogs.com/eqnedit.php?latex=n))
 ```
 
 ## Future expansion
@@ -86,7 +86,7 @@ env.reset(random_seed=*n*)
 test against.
 - Create a different reward function to encourage eliminting the robots as
 quickly as possible.
-- Possibly add some random moves to the robots (i.e. 0.1 chance of going to
+- Possibly add some random moves to the robots i.e. 0.1 chance of going to
 the left or right of the 'deterministic' move to close the gap on the agent.
 - Reinstate the original 'Jump' function where you would be transported to a 
 random square when the agent had no hope of winning. Though this could land the
