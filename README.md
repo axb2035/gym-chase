@@ -11,13 +11,13 @@ To use gym-chase ```gym``` needs to be installed into your target virtual
 environment. To install gym-chase activate your target virtual environment and
 type:
 ```
-pip install git+https://github.com/axb2035/gym-chase.git
+> pip install git+https://github.com/axb2035/gym-chase.git
 ```
 
 ## The environment
-The arena is a 20x20 arena surrounded by high voltage zappers. Ten random
-zappers are also distributed around the arena. If the agent moves into
-a zapper (either by moving to an outside edge of arena or into a free 
+The environment is a 20x20 arena surrounded by high voltage zappers. Ten 
+random zappers are also distributed around the arena. If the agent moves 
+into a zapper (either by moving to an outside edge of arena or into a free 
 standing one) it is eliminated and the epsisode ends.
 
 Each step an agent can move horiziontally one square, vertically one 
@@ -32,7 +32,7 @@ episode ends. If a robot wants to move to a square which is occupied
 by another robot it will not move. If the agent moves into a zapper the
 robots will still move completing the 'step'.    
 
-An example map looks like this:
+An example state looks like this:
 ```
 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
@@ -55,10 +55,10 @@ An example map looks like this:
 1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
 ```
-1. Boundary zapper
-2. Random zapper
-3. Robot
-4. Agent
+1. Boundary zapper.
+2. Random zapper.
+3. Robot.
+4. Agent.
 
 The aim of the game is for the agent to eliminate the robots by placing 
 a zapper between the agent and robot so the robot moves into a zapper in 
@@ -76,9 +76,9 @@ is eliminated and zero otherwise.
 
 When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
-a new starting arena:
+a different starting position:
 ```
-env.reset(random_seed=![equation](https://www.codecogs.com/eqnedit.php?latex=n))
+env.reset(random_seed=![equation](http://latex.codecogs.com/svg.latex?n))
 ```
 
 ## Future expansion
