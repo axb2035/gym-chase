@@ -78,10 +78,10 @@ When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
 a different starting position:
 ```
-env.reset(random_seed=```![equation](http://latex.codecogs.com/svg.latex?n)```)
+env.reset(random_seed=101)
 ```
 
-## Future expansion
+## Todo / Future expansion
 - Record a human playing the first 100 random arenas to give a benchmark to 
 test against.
 - Create a different reward function to encourage eliminting the robots as
