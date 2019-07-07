@@ -58,9 +58,11 @@ def move(arena, loc, tar, element):
 class ChaseEnv(gym.Env):
     """
     Chase is based on a text game first created in the 1970's and featured
-    in a number of 80s personal computer programming books.
+    in a number of 1980's personal computer programming books. See:
+    https://www.atariarchives.org/morebasicgames/showpage.php?page=26
+    for an example.
     
-    The world is a 20x20 arena surrounded by high voltage zappers. Ten random
+    The arena is a 20x20 arena surrounded by high voltage zappers. Ten random
     zappers are also distributed around the arena. If the agent moves into
     a zapper (either by moving to an outside edge of arena or into a free 
     standing one) it is eliminated and the epsisode ends.

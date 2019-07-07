@@ -6,6 +6,9 @@ in a number of 1980's personal computer programming books. See:
 https://www.atariarchives.org/morebasicgames/showpage.php?page=26
 for an example.
 
+The challenge is to build a reinforcement learning agent that can consistently
+eliminate all robots without getting eliminated itself.
+
 ## Installation
 To use gym-chase ```gym``` needs to be installed into your target virtual 
 environment. To install gym-chase activate your target virtual environment and
@@ -23,6 +26,12 @@ standing one) it is eliminated and the epsisode ends.
 Each step an agent can move horiziontally one square, vertically one 
 square, a combination of one vertcal and horiziontal square or not move.
 This gives the agent nine possible actions per step.
+
+	7  8  9
+	 \ | /
+	4- 5 -6
+	 / | \
+	1  2  3
 
 Besides the zappers there are also five robots which move towards the
 agent each step. The robots have no self-preservation instincts and will
@@ -86,13 +95,14 @@ env.reset(random_seed=101)
 test against.
 - Create a different reward function to encourage eliminting the robots as
 quickly as possible.
-- Possibly add some random moves to the robots i.e. 0.1 chance of going to
-the left or right of the 'deterministic' move to close the gap on the agent.
+- Make the environment more 'stochastic' by add some random variation to the 
+robots i.e. 0.1 chance of going to the left or right of the 'deterministic' 
+move to close the gap on the agent.
 - Reinstate the original 'Jump' function where you would be transported to a 
 random square when the agent had no hope of winning. Though this could land the
 agent on a robot or zapper so it wasn't a gaurenteed escape plan!
 - Reinstate that robots moving into each other are both eliminated.
 - Any improvments in coding that are suggested.
 
-## Thanks to:
+## Thanks to
 - Eike and everyone at the Melbourne MLAI Bookclub for insightful feedback.

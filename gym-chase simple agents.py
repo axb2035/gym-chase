@@ -3,8 +3,26 @@ Created on Mon Jun 24 16:29:35 2019
 
 Create a basic test bed for the Chase gym environment...
 """
-import random
-import time
+import numpy as np
+
+from datetime import datetime
+
+def write_chase_log(log):
+    file_time = datetime.now().strftime("%Y%m%d - %H%M")
+    f_name = 'Chase - human - ' + file_time + '.csv'
+    with open(f_name, "w", newline="") as f:
+        h_line = 'Episode,Step,Action,Reward,Done,{}\n'.format(np.array2string(np.arange(0.0, 400.0)).replace('.', ',').replace('\n', '').replace(' ', '')[1:-2])
+        f.write(h_line)
+        for item in log:
+            l_line = '{},{},{},{},{},{}\n'.format(item[0],
+                                                  item[1],
+                                                  item[2],
+                                                  item[3],
+                                                  item[4],
+                                                  str(item[5]).replace('.', ',').replace('\n', '')[1:-2]) 
+            f.write(l_line)
+        f.close
+       
 
 import gym
 from gym_chase.envs import ChaseEnv
@@ -13,8 +31,9 @@ env = gym.make('gym_chase:Chase-v0')
 
 # Simple human agent
 
-EPISODES = 3
+EPISODES = 1
 e = 0
+state_log = []
 
 # Simple human agent
 
@@ -22,7 +41,10 @@ while e < EPISODES:
     done = False
     e_step = 1
     total_reward = 0
-    env.reset(random_seed=e)    
+    state = env.reset(random_seed=e)
+    state = state.ravel()
+    #
+    state_log.append([e, e_step, None, None, done, state])
     while not done:
         env.render()
         print('\n7   8   9')
@@ -31,20 +53,26 @@ while e < EPISODES:
         print('  / | \\')
         print('1   2   3')
         p_move = input('\nYour move [1-9 move, 5 stay still]:')
-        _, r, done = env.step(p_move)
+        n_state, r, done = env.step(p_move)
         print('\nEpisode:', e, 'Step:', e_step)
         print('\nReward:', r)
         total_reward += r
         e_step += 1
+        n_state = n_state.ravel()
+        state_log.append([e, e_step, p_move, r, done, n_state])
     env.render()
     if total_reward == 5:
         print("\nAll robots eliminated. Total reward =", total_reward)
     else:
-        print("\nAgent eliminated. Total reward =", total_reward)
+        print("\nAgent eliminated. Total reward =", total_reward)        
     e += 1
+
+write_chase_log(state_log)
 
 # Simple random agent
 """
+import random
+
 random.seed()
 done = False
 while not done:
@@ -62,4 +90,3 @@ if total_reward == 5:
 else:
     print("\nAgent eliminated. Total reward =", total_reward)
 """
-
