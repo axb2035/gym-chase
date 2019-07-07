@@ -4,6 +4,7 @@ Created on Mon Jun 24 16:29:35 2019
 Create a basic test bed for the Chase gym environment...
 """
 import numpy as np
+import copy
 
 from datetime import datetime
 
@@ -13,25 +14,25 @@ def write_chase_log(log):
     with open(f_name, "w", newline="") as f:
         h_line = 'Episode,Step,Action,Reward,Done,{}\n'.format(np.array2string(np.arange(0.0, 400.0)).replace('.', ',').replace('\n', '').replace(' ', '')[1:-2])
         f.write(h_line)
-        for item in log:
-            l_line = '{},{},{},{},{},{}\n'.format(item[0],
-                                                  item[1],
-                                                  item[2],
-                                                  item[3],
-                                                  item[4],
-                                                  str(item[5]).replace('.', ',').replace('\n', '')[1:-2]) 
+        for i in range(len(log)):
+            l_line = '{},{},{},{},{},{}\n'.format(log[i][0],
+                                                  log[i][1],
+                                                  log[i][2],
+                                                  log[i][3],
+                                                  log[i][4],
+                                                  str(log[i][5]).replace('.', ',').replace('\n', '')[1:-2]) 
             f.write(l_line)
         f.close
        
 
 import gym
-from gym_chase.envs import ChaseEnv
+#from gym_chase.envs import ChaseEnv
 
-env = gym.make('gym_chase:Chase-v0')
+#env = gym.make('gym_chase:Chase-v0')
 
 # Simple human agent
 
-EPISODES = 1
+EPISODES = 10
 e = 0
 state_log = []
 
@@ -43,8 +44,9 @@ while e < EPISODES:
     total_reward = 0
     state = env.reset(random_seed=e)
     state = state.ravel()
-    #
-    state_log.append([e, e_step, None, None, done, state])
+    
+    state_log.append([e, e_step, None, None, done, copy.deepcopy(state)])
+    
     while not done:
         env.render()
         print('\n7   8   9')
@@ -59,7 +61,7 @@ while e < EPISODES:
         total_reward += r
         e_step += 1
         n_state = n_state.ravel()
-        state_log.append([e, e_step, p_move, r, done, n_state])
+        state_log.append([e, e_step, p_move, r, done, copy.deepcopy(n_state)])
     env.render()
     if total_reward == 5:
         print("\nAll robots eliminated. Total reward =", total_reward)
