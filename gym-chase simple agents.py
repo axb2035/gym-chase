@@ -8,9 +8,9 @@ import copy
 
 from datetime import datetime
 
-def write_chase_log(log):
+def write_chase_log(log, agent_name):
     file_time = datetime.now().strftime("%Y%m%d - %H%M")
-    f_name = 'Chase - human - ' + file_time + '.csv'
+    f_name = 'Chase - ' + agent_name + ' - ' + file_time + '.csv'
     with open(f_name, "w", newline="") as f:
         h_line = 'Episode,Step,Action,Reward,Done,{}\n'.format(np.array2string(np.arange(0.0, 400.0)).replace('.', ',').replace('\n', '').replace(' ', '')[1:-2])
         f.write(h_line)
@@ -32,12 +32,12 @@ import gym
 
 # Simple human agent
 
-EPISODES = 10
+EPISODES = 100
 e = 0
 state_log = []
 
 # Simple human agent
-
+"""
 while e < EPISODES:
     done = False
     e_step = 1
@@ -68,27 +68,37 @@ while e < EPISODES:
     else:
         print("\nAgent eliminated. Total reward =", total_reward)        
     e += 1
-
-write_chase_log(state_log)
+    
+write_chase_log(state_log, 'Human')
 
 # Simple random agent
 """
 import random
 
-random.seed()
-done = False
-while not done:
-    # time.sleep(2)
+while e < EPISODES:
+    done = False
+    e_step = 1
+    total_reward = 0
+    state = env.reset(random_seed=e)
+    state = state.ravel()
+    state_log.append([e, e_step, None, None, done, copy.deepcopy(state)])
+    
+    random.seed()
+    while not done:
+        # time.sleep(2)
+        env.render()
+        move = random.choice(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+        n_state, r, done = env.step(move)
+        print('\nReward:', r)
+        total_reward += r 
+        e_step += 1
+        n_state = n_state.ravel()
+        state_log.append([e, e_step, move, r, done, copy.deepcopy(n_state)])
     env.render()
-    move = random.choice(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
-    _, r, done = env.step(move)
-    print('\nReward:', r)
-    total_reward += r 
-
-env.render()
-
-if total_reward == 5:
-    print("\nAll robots eliminated. Total reward =", total_reward)
-else:
-    print("\nAgent eliminated. Total reward =", total_reward)
-"""
+    if total_reward == 5:
+        print("\nAll robots eliminated. Total reward =", total_reward)
+    else:
+        print("\nAgent eliminated. Total reward =", total_reward)
+    e += 1
+    
+write_chase_log(state_log, 'Random')
