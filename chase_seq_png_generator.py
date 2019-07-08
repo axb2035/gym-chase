@@ -16,7 +16,7 @@ fnt_a_100 = ImageFont.truetype(font_path + 'Arial.ttf', 100)
 fnt_c_40 = ImageFont.truetype(font_path + courier, 40)
 
 try:
-    chase_seq = pd.read_csv('Chase - Random - 20190708 - 0751.csv')
+    chase_seq = pd.read_csv('Chase - Human - 20190708 - 1957.csv')
 except:
     print('Can not open log file.')
 

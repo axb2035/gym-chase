@@ -40,10 +40,14 @@ def generate_arena(robots=5, random_seed=0):
     a = 0
     while a < 1:
         a_x, a_y = random.randint(1,19), random.randint(1,19)
+        a += 1
         if arena[a_x][a_y] == 0:
-            arena[a_x][a_y] = 4
-            a += 1
-            a_pos = [a_x, a_y]
+            # check for neigbouring robots
+            for x in range(-1, 2):
+                for y in range(-1, 2):
+                    if arena[a_x + x][a_y + y] == 3:
+                        a = 0
+    a_pos = [a_x, a_y]
 
     return arena, r_pos, a_pos
 
@@ -180,6 +184,7 @@ class ChaseEnv(gym.Env):
         
         # Robots turn!
         robot = 0
+        r_del = []
         while robot < len(r_pos):
             # Which way to the player?
             tar_x, tar_y = a_pos[0] - r_pos[robot][0], a_pos[1] - r_pos[robot][1]            
@@ -213,15 +218,18 @@ class ChaseEnv(gym.Env):
                 else:
                     # ZZZAAAAPPPPP!!!! - Fried robot.
                     self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
-                    del r_pos[robot]   
+                    r_del.append(robot)
                     r += 1
             else: # Update robot position
                 move(self.arena, r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
-            
             robot += 1
-                
+            
+        # Clean out dead robots.
+        for r in r_del:
+            del r_pos[robot]   
+        
         return self.arena, r, done
 
     def reset(self, random_seed=0):
@@ -244,3 +252,39 @@ class ChaseEnv(gym.Env):
         output = ' ' + '\n'.join(arena_human.ravel())
 
         outfile.write(output)
+
+#----
+EPISODES = 1
+e = 0
+state_log = []
+
+while e < EPISODES:
+    done = False
+    e_step = 0
+    total_reward = 0
+    state = env.reset(random_seed=e)
+    state = state.ravel()
+    
+    state_log.append([e, e_step, None, None, done, copy.deepcopy(state)])
+    
+    while not done:
+        env.render()
+        print('\n7   8   9')
+        print('  \\ | /')
+        print('4 - 5 - 6')
+        print('  / | \\')
+        print('1   2   3')
+        p_move = input('\nYour move [1-9 move, 5 stay still]:')
+        n_state, r, done = env.step(p_move)
+        print('\nEpisode:', e, 'Step:', e_step)
+        print('\nReward:', r)
+        total_reward += r
+        e_step += 1
+        n_state = n_state.ravel()
+        state_log.append([e, e_step, p_move, r, done, copy.deepcopy(n_state)])
+    env.render()
+    if total_reward == 5:
+        print("\nAll robots eliminated. Total reward =", total_reward)
+    else:
+        print("\nAgent eliminated. Total reward =", total_reward)        
+    e += 1

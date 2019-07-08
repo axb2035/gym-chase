@@ -37,10 +37,10 @@ e = 0
 state_log = []
 
 # Simple human agent
-"""
+
 while e < EPISODES:
     done = False
-    e_step = 1
+    e_step = 0
     total_reward = 0
     state = env.reset(random_seed=e)
     state = state.ravel()
@@ -77,7 +77,7 @@ import random
 
 while e < EPISODES:
     done = False
-    e_step = 1
+    e_step = 0
     total_reward = 0
     state = env.reset(random_seed=e)
     state = state.ravel()
@@ -102,3 +102,4 @@ while e < EPISODES:
     e += 1
     
 write_chase_log(state_log, 'Random')
+"""
