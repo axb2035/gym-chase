@@ -231,8 +231,8 @@ class ChaseEnv(gym.Env):
             
         # Clean out dead robots.
         r_adj = 0
-        for r in r_del:
-            del r_pos[r - r_adj]   
+        for r_dead in r_del:
+            del r_pos[r_dead - r_adj]   
             r_adj += 1
             
         return self.arena, r, done
