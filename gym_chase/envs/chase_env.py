@@ -252,39 +252,3 @@ class ChaseEnv(gym.Env):
         output = ' ' + '\n'.join(arena_human.ravel())
 
         outfile.write(output)
-
-#----
-EPISODES = 1
-e = 0
-state_log = []
-
-while e < EPISODES:
-    done = False
-    e_step = 0
-    total_reward = 0
-    state = env.reset(random_seed=e)
-    state = state.ravel()
-    
-    state_log.append([e, e_step, None, None, done, copy.deepcopy(state)])
-    
-    while not done:
-        env.render()
-        print('\n7   8   9')
-        print('  \\ | /')
-        print('4 - 5 - 6')
-        print('  / | \\')
-        print('1   2   3')
-        p_move = input('\nYour move [1-9 move, 5 stay still]:')
-        n_state, r, done = env.step(p_move)
-        print('\nEpisode:', e, 'Step:', e_step)
-        print('\nReward:', r)
-        total_reward += r
-        e_step += 1
-        n_state = n_state.ravel()
-        state_log.append([e, e_step, p_move, r, done, copy.deepcopy(n_state)])
-    env.render()
-    if total_reward == 5:
-        print("\nAll robots eliminated. Total reward =", total_reward)
-    else:
-        print("\nAgent eliminated. Total reward =", total_reward)        
-    e += 1
