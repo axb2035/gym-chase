@@ -47,6 +47,9 @@ def generate_arena(robots=5, random_seed=0):
                 for y in range(-1, 2):
                     if arena[a_x + x][a_y + y] == 3:
                         a = 0
+        else:
+            a = 0
+    arena[a_x][a_y] = 4
     a_pos = [a_x, a_y]
 
     return arena, r_pos, a_pos
@@ -227,9 +230,11 @@ class ChaseEnv(gym.Env):
             robot += 1
             
         # Clean out dead robots.
+        r_adj = 0
         for r in r_del:
-            del r_pos[robot]   
-        
+            del r_pos[r - r_adj]   
+            r_adj += 1
+            
         return self.arena, r, done
 
     def reset(self, random_seed=0):
