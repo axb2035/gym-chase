@@ -1,27 +1,26 @@
 import sys
+import numpy as np
+import random
 
 import gym
 from gym import spaces
-
-import numpy as np
-import random
 
 
 def generate_arena(robots=5, random_seed=0):
     random.seed(random_seed)
     ax, ay = 20, 20
     arena = np.zeros((ax, ay))
-        
+
     # Create boundary zappers.
     for i in range(ax):
-        for j in range(ay):            
+        for j in range(ay):
             if j in [0, ay-1] or i in [0, ax-1]:
-               arena[i][j] = 1
+                arena[i][j] = 1
 
     # Place random zappers.
     z = 0
     while z < 10:
-        z_x, z_y = random.randint(1,19), random.randint(1,19)
+        z_x, z_y = random.randint(1, 19), random.randint(1, 19)
         if arena[z_x][z_y] == 0:
             arena[z_x][z_y] = 2
             z += 1
@@ -30,7 +29,7 @@ def generate_arena(robots=5, random_seed=0):
     r_pos = []
     r = 0
     while r < robots:
-        r_x, r_y = random.randint(1,19), random.randint(1,19)
+        r_x, r_y = random.randint(1, 19), random.randint(1, 19)
         if arena[r_x][r_y] == 0:
             arena[r_x][r_y] = 3
             r_pos.append([r_x, r_y])
@@ -39,7 +38,7 @@ def generate_arena(robots=5, random_seed=0):
     # Place agent.
     a = 0
     while a < 1:
-        a_x, a_y = random.randint(1,19), random.randint(1,19)
+        a_x, a_y = random.randint(1, 19), random.randint(1, 19)
         a += 1
         if arena[a_x][a_y] == 0:
             # check for neigbouring robots
@@ -54,13 +53,15 @@ def generate_arena(robots=5, random_seed=0):
 
     return arena, r_pos, a_pos
 
+
 def look(arena, loc, tar):
-    return arena[loc[0] + tar[0]][loc[1] + tar[1]]        
+    return arena[loc[0] + tar[0]][loc[1] + tar[1]]
+
 
 def move(arena, loc, tar, element):
     arena[loc[0]][loc[1]] = 0
     arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
-    return
+
 
 class ChaseEnv(gym.Env):
     """
@@ -68,26 +69,26 @@ class ChaseEnv(gym.Env):
     in a number of 1980's personal computer programming books. See:
     https://www.atariarchives.org/morebasicgames/showpage.php?page=26
     for an example.
-    
+
     The arena is a 20x20 arena surrounded by high voltage zappers. Ten random
     zappers are also distributed around the arena. If the agent moves into
-    a zapper (either by moving to an outside edge of arena or into a free 
+    a zapper (either by moving to an outside edge of arena or into a free
     standing one) it is eliminated and the epsisode ends.
-    
-    Each step an agent can move horiziontally one square, vertically one 
+
+    Each step an agent can move horiziontally one square, vertically one
     square, a combination of one vertcal and horiziontal square or not move.
     This gives the agent nine possible actions per step.
-    
+
     Besides the zappers there are also five robots which move towards the
     agent each step. The robots have no self-preservation instincts and will
-    move into a zapper in an attempt to get closer to the agent. If a robot 
+    move into a zapper in an attempt to get closer to the agent. If a robot
     moves into the same square as the agent the agent is eliminated and the
     episode ends. If a robot wants to move to a square which is occupied
     by another robot it will not move. If the agent moves into a zapper the
-    robots will still move completing the 'step'.    
-    
+    robots will still move completing the 'step'.
+
     An example map looks like this:
-        
+
     1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
     1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
     1. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
@@ -108,69 +109,54 @@ class ChaseEnv(gym.Env):
     1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 1.
     1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
     1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
-    
+
     1 : Boundary zapper
     2 : Random zapper
     3 : Robot
     4 : Agent
-    
-    The aim of the game is for the agent to eliminate the robots by placing 
-    a zapper between the agent and robot so the robot moves into a zapper in 
+
+    The aim of the game is for the agent to eliminate the robots by placing
+    a zapper between the agent and robot so the robot moves into a zapper in
     an attempt to capture the agent.
 
     The episode ends when:
         - the agent is eliminated by moving into a zapper;
         - the agent is eliminated by a robot moving into the agent; or
         - all robots are eliminated.
-        
+
     The agent receives a reward of 1 for each robot eliminated, -1 if the agent
     is eliminated and zero otherwise.
 
     """
-    
+
     metadata = {'render.modes': ['human']}
-  
+
     def __init__(self):
         self.observation_space = spaces.Box(low=0, high=4, shape=(20, 20), dtype=np.uint8)
         self.action_space = 9
-      
-        
+
+
     def step(self, action):
         r = 0
         a_pos = self.a_pos
         r_pos = self.r_pos
         done = False
-        
-        if action == '7':
-            # Move North West.
-            a_move = [-1, -1]    
-        elif action == '8':
-            # Move North.
-            a_move = [-1, 0]
-        elif action == '9':
-            # Move North East.
-            a_move = [-1, 1]
-        elif action == '6':
-            # Move East.
-            a_move = [0, 1]
-        elif action == '3':
-            # Move South East.
-            a_move = [1, 1]
-        elif action == '2':
-            # Move South.
-            a_move = [1, 0]
-        elif action == '1':
-            # Move South West.
-            a_move = [1, -1]
-        elif action == '4':
-            # Move West.
-            a_move = [0, -1]            
-        elif action == '5':
-            # If I stay still maybe they won't see me!
-            a_move = [0, 0]
-        else: # Should not get here - treat as no move.
-            a_move = [0, 0]
-            
+        a_move = [0, 0]
+
+        if action >= 7:
+            # Move North (NW, N , NE).
+            a_move[0] = -1
+        if action <= 3:
+            # Move South (SW, S , SE).
+            a_move[0] = 1
+        if action in [1, 4, 7]:
+            # Move West (SW, W , NW).
+            a_move[1] = -1
+        if action in [3, 6, 9]:
+            # Move East (SE, E , NE).
+            a_move[1] = 1
+        # no move (5) results in no change
+
         # assess the move
         if look(self.arena, a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
@@ -184,15 +170,15 @@ class ChaseEnv(gym.Env):
         # Even if zapped, need to update agent for possible pyhrric reward.
         a_pos[0] += a_move[0]
         a_pos[1] += a_move[1]
-        
+
         # Robots turn!
         robot = 0
         r_del = []
         while robot < len(r_pos):
             # Which way to the player?
-            tar_x, tar_y = a_pos[0] - r_pos[robot][0], a_pos[1] - r_pos[robot][1]            
-            
-            if abs(tar_x) == abs(tar_y): 
+            tar_x, tar_y = a_pos[0] - r_pos[robot][0], a_pos[1] - r_pos[robot][1]
+
+            if abs(tar_x) == abs(tar_y):
                 r_move = [np.sign(tar_x), np.sign(tar_y)]
             elif abs(tar_x) > abs(tar_y):
                 r_move = [np.sign(tar_x), 0]
@@ -200,17 +186,17 @@ class ChaseEnv(gym.Env):
                 r_move = [0, np.sign(tar_y)]
 
             tar_look = look(self.arena, r_pos[robot], r_move)
-            
+
             # Check to make sure robots don't move on top of each other.
             if tar_look == 3:
                 r_move = [0, 0]
-            
+
             # Has robot caught the player?
             if tar_look == 4:
                 # ZZZAAAAPPPPP!!!! - Agent was caught by a robot.
                 r -= 1
                 done = True
-            
+
             # Check if robot done something stupid otherwise update position.
             if tar_look in [1, 2]:
                 if len(r_pos)-1 == 0:
@@ -228,13 +214,13 @@ class ChaseEnv(gym.Env):
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
             robot += 1
-            
+
         # Clean out dead robots.
         r_adj = 0
         for r_dead in r_del:
-            del r_pos[r_dead - r_adj]   
+            del r_pos[r_dead - r_adj]
             r_adj += 1
-            
+
         return self.arena, r, done
 
     def reset(self, random_seed=0):
@@ -243,9 +229,9 @@ class ChaseEnv(gym.Env):
 
     def render(self, mode='human'):
         outfile = sys.stdout
-       
+
         arena_human = np.array2string(self.arena)
-        
+
         arena_human = np.char.replace(arena_human, '0.', ' ')
         arena_human = np.char.replace(arena_human, '1.', 'X')
         arena_human = np.char.replace(arena_human, '2.', 'X')
@@ -253,7 +239,7 @@ class ChaseEnv(gym.Env):
         arena_human = np.char.replace(arena_human, '4.', 'A')
         arena_human = np.char.replace(arena_human, '[', '')
         arena_human = np.char.replace(arena_human, ']', '')
-        
+
         output = ' ' + '\n'.join(arena_human.ravel())
 
         outfile.write(output)
