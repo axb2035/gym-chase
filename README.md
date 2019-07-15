@@ -99,16 +99,16 @@ non-human is for the first 10,000 arenas (to set a starting arena see notes
 above).
 
 | Agent   | mean r  | % won (r=5) |
-| --------|---------|-------------|
-| Human*  |  4.11  	| 84.0%       |
+| :-------|:-------:|:-----------:|
+| Human<sup>1</sup>  |  4.11  	| 84.0%       |
 | Possum  | -0.3342 |  1.06%      |
 | Random  | -0.4257 |  0.08%      |
 
-* Based on first 100 arenas. I have life outside of this project...
+1. Based on first 100 arenas. I do have life outside of this project...
 
 ## Todo / Future expansion
 
-- Create a different reward function to encourage eliminting the robots as
+- Create a different reward function to encourage elimanting the robots as
 quickly as possible.
 - Make the environment more 'stochastic' by add some random variation to the 
 robots i.e. 0.1 chance of going to the left or right of the 'deterministic' 
