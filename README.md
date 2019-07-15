@@ -89,10 +89,25 @@ a different starting position:
 ```
 env.reset(random_seed=101)
 ```
+It may be possible to get a never ending sequence of moves between the agent 
+and one remaining robot. Recommend putting a step ceiling on any agent to
+ensure episode will end.
+
+## Performance tables
+The following are agents that you can benchmark against. The validation set for 
+non-human is for the first 10,000 arenas (to set a starting arena see notes 
+above).
+
+| Agent   | mean r  | % won (r=5) |
+| --------|---------|-------------|
+| Human*  |  4.11  	| 84.0%       |
+| Possum  | -0.3342 |  1.06%      |
+| Random  | -0.4257 |  0.08%      |
+
+* Based on first 100 arenas. I have life outside of this project...
 
 ## Todo / Future expansion
-- Record a human playing the first 100 random arenas to give a benchmark to 
-test against.
+
 - Create a different reward function to encourage eliminting the robots as
 quickly as possible.
 - Make the environment more 'stochastic' by add some random variation to the 
@@ -102,7 +117,7 @@ move to close the gap on the agent.
 random square when the agent had no hope of winning. Though this could land the
 agent on a robot or zapper so it wasn't a gaurenteed escape plan!
 - Reinstate that robots moving into each other are both eliminated.
-- Any improvments in coding that are suggested.
+- Any improvements in coding that are suggested.
 
 ## Thanks to
 - Eike and everyone at the Melbourne MLAI Bookclub for insightful feedback.
