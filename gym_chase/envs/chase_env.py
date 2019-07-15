@@ -41,7 +41,7 @@ def generate_arena(robots=5, random_seed=0):
         a_x, a_y = random.randint(1, 19), random.randint(1, 19)
         a += 1
         if arena[a_x][a_y] == 0:
-            # check for neigbouring robots
+            # Check for neigbouring robots.
             for x in range(-1, 2):
                 for y in range(-1, 2):
                     if arena[a_x + x][a_y + y] == 3:
@@ -132,7 +132,10 @@ class ChaseEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        self.observation_space = spaces.Box(low=0, high=4, shape=(20, 20), dtype=np.uint8)
+        self.observation_space = spaces.Box(low=0, 
+                                            high=4, 
+                                            shape=(20, 20), 
+                                            dtype=np.uint8)
         self.action_space = 9
 
 
@@ -155,9 +158,9 @@ class ChaseEnv(gym.Env):
         if action in [3, 6, 9]:
             # Move East (SE, E , NE).
             a_move[1] = 1
-        # no move (5) results in no change
+        # No move (5) results in no change.
 
-        # assess the move
+        # Assess agent move.
         if look(self.arena, a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
             self.arena[a_pos[0]][a_pos[1]] = 0
@@ -199,27 +202,23 @@ class ChaseEnv(gym.Env):
 
             # Check if robot done something stupid otherwise update position.
             if tar_look in [1, 2]:
-                if len(r_pos)-1 == 0:
-                    self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
-                    # ZZZAAAAPPPPP!!!! - All robots gone. Agent wins.
-                    r += 1
-                    done = True
-                else:
-                    # ZZZAAAAPPPPP!!!! - Fried robot.
-                    self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
-                    r_del.append(robot)
-                    r += 1
-            else: # Update robot position
+                # ZZZAAAAPPPPP!!!! - Fried robot.
+                self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
+                r_del.append(robot)
+                r += 1
+            else: # Update robot position.
                 move(self.arena, r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
             robot += 1
 
-        # Clean out dead robots.
+        # Clean out eliminated robots.
         r_adj = 0
         for r_dead in r_del:
             del r_pos[r_dead - r_adj]
             r_adj += 1
+        if len(r_pos) == 0:
+            done = True # All robots eliminated.
 
         return self.arena, r, done
 
