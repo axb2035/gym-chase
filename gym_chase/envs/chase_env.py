@@ -221,7 +221,10 @@ class ChaseEnv(gym.Env):
         if len(r_pos) == 0:
             done = True # All robots eliminated.
 
-        return self.arena, r, done
+        # TODO: Add info. For now return an empty dict.
+        info = {}
+
+        return self.arena, r, done, False, info
 
     def reset(self, random_seed=0):
         self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=random_seed)
