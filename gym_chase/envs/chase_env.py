@@ -136,7 +136,8 @@ class ChaseEnv(gym.Env):
                                             high=4, 
                                             shape=(20, 20), 
                                             dtype=np.uint8)
-        self.action_space = 9
+        
+        self.action_space = spaces.Discrete(9,)
 
 
     def step(self, action):
