@@ -132,13 +132,12 @@ class ChaseEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        self.observation_space = spaces.Box(low=0, 
-                                            high=4, 
-                                            shape=(20, 20), 
+        self.observation_space = spaces.Box(low=0,
+                                            high=4,
+                                            shape=(20, 20),
                                             dtype=np.uint8)
-        
-        self.action_space = spaces.Discrete(9,)
 
+        self.action_space = spaces.Discrete(9,)
 
     def step(self, action):
         r = 0
@@ -180,7 +179,8 @@ class ChaseEnv(gym.Env):
         r_del = []
         while robot < len(r_pos):
             # Which way to the player?
-            tar_x, tar_y = a_pos[0] - r_pos[robot][0], a_pos[1] - r_pos[robot][1]
+            tar_x = a_pos[0] - r_pos[robot][0]
+            tar_y = a_pos[1] - r_pos[robot][1]
 
             if abs(tar_x) == abs(tar_y):
                 r_move = [np.sign(tar_x), np.sign(tar_y)]
@@ -207,7 +207,7 @@ class ChaseEnv(gym.Env):
                 self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
                 r_del.append(robot)
                 r += 1
-            else: # Update robot position.
+            else:  # Update robot position.
                 move(self.arena, r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
@@ -219,15 +219,15 @@ class ChaseEnv(gym.Env):
             del r_pos[r_dead - r_adj]
             r_adj += 1
         if len(r_pos) == 0:
-            done = True # All robots eliminated.
+            done = True  # All robots eliminated.
 
         # TODO: Add info. For now return an empty dict.
         info = {}
 
         return self.arena, r, done, False, info
 
-    def reset(self, random_seed=0):
-        self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=random_seed)
+    def reset(self, seed=0):
+        self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=seed)
         return self.arena
 
     def render(self, mode='human'):
