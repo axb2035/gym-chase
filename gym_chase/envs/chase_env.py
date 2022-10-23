@@ -9,7 +9,7 @@ from gym import spaces
 def generate_arena(robots=5, random_seed=0):
     random.seed(random_seed)
     ax, ay = 20, 20
-    arena = np.zeros((ax, ay))
+    arena = np.zeros((ax, ay), dtype=np.uint8)
 
     # Create boundary zappers.
     for i in range(ax):
@@ -226,9 +226,12 @@ class ChaseEnv(gym.Env):
 
         return self.arena, r, done, False, info
 
-    def reset(self, seed=0):
+    def reset(self, seed=None, options=None):
         self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=seed)
-        return self.arena
+        # TODO: Add info. For now return an empty dict.
+        info = {}
+
+        return self.arena, info
 
     def render(self, mode='human'):
         outfile = sys.stdout
