@@ -139,26 +139,24 @@ class ChaseEnv(gym.Env):
 
         self.action_space = spaces.Discrete(9,)
 
+        self.action_to_direction = {
+            1: np.array([-1, 1]),
+            2: np.array([0, 1]),
+            3: np.array([1, 1]),
+            4: np.array([-1, 0]),
+            5: np.array([0, 0]),
+            6: np.array([1, 0]),
+            7: np.array([-1, -1]),
+            8: np.array([0, -1]),
+            9: np.array([1, -1]),
+        }
+
     def step(self, action):
         r = 0
         a_pos = self.a_pos
         r_pos = self.r_pos
         done = False
-        a_move = [0, 0]
-
-        if action >= 7:
-            # Move North (NW, N , NE).
-            a_move[0] = -1
-        if action <= 3:
-            # Move South (SW, S , SE).
-            a_move[0] = 1
-        if action in [1, 4, 7]:
-            # Move West (SW, W , NW).
-            a_move[1] = -1
-        if action in [3, 6, 9]:
-            # Move East (SE, E , NE).
-            a_move[1] = 1
-        # No move (5) results in no change.
+        a_move = self.action_to_direction[action]
 
         # Assess agent move.
         if look(self.arena, a_pos, a_move) in [1, 2, 3]:
