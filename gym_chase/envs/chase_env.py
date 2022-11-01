@@ -129,9 +129,11 @@ class ChaseEnv(gym.Env):
 
     """
 
-    metadata = {'render.modes': ['human']}
+    metadata = {'render_modes': ['human'], "render_fps": 1}
 
-    def __init__(self):
+    def __init__(self, render_mode=None):
+        self.render_mode = render_mode
+
         self.observation_space = spaces.Box(low=0,
                                             high=4,
                                             shape=(20, 20),
@@ -231,16 +233,16 @@ class ChaseEnv(gym.Env):
 
         return self.arena, info
 
-    def render(self, mode='human'):
+    def render(self):
         outfile = sys.stdout
 
         arena_human = np.array2string(self.arena)
 
-        arena_human = np.char.replace(arena_human, '0.', ' ')
-        arena_human = np.char.replace(arena_human, '1.', 'X')
-        arena_human = np.char.replace(arena_human, '2.', 'X')
-        arena_human = np.char.replace(arena_human, '3.', 'R')
-        arena_human = np.char.replace(arena_human, '4.', 'A')
+        arena_human = np.char.replace(arena_human, '0', ' ')
+        arena_human = np.char.replace(arena_human, '1', 'X')
+        arena_human = np.char.replace(arena_human, '2', 'X')
+        arena_human = np.char.replace(arena_human, '3', 'R')
+        arena_human = np.char.replace(arena_human, '4', 'A')
         arena_human = np.char.replace(arena_human, '[', '')
         arena_human = np.char.replace(arena_human, ']', '')
 
