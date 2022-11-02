@@ -96,7 +96,7 @@ class ChaseEnv(gym.Env):
             9: np.array([-1, 1]),
         }
 
-    def _generate_arena(robots=5, random_seed=0):
+    def _generate_arena(self, robots=5, random_seed=0):
         random.seed(random_seed)
         ax, ay = 20, 20
         arena = np.zeros((ax, ay), dtype=np.uint8)
@@ -143,10 +143,10 @@ class ChaseEnv(gym.Env):
 
         return arena, r_pos, a_pos
 
-    def _look(arena, loc, tar):
+    def _look(self, arena, loc, tar):
         return arena[loc[0] + tar[0]][loc[1] + tar[1]]
 
-    def _move(arena, loc, tar, element):
+    def _move(self, arena, loc, tar, element):
         arena[loc[0]][loc[1]] = 0
         arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
 
