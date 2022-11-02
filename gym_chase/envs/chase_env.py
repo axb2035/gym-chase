@@ -6,63 +6,6 @@ import gym
 from gym import spaces
 
 
-def generate_arena(robots=5, random_seed=0):
-    random.seed(random_seed)
-    ax, ay = 20, 20
-    arena = np.zeros((ax, ay), dtype=np.uint8)
-
-    # Create boundary zappers.
-    for i in range(ax):
-        for j in range(ay):
-            if j in [0, ay-1] or i in [0, ax-1]:
-                arena[i][j] = 1
-
-    # Place random zappers.
-    z = 0
-    while z < 10:
-        z_x, z_y = random.randint(1, 19), random.randint(1, 19)
-        if arena[z_x][z_y] == 0:
-            arena[z_x][z_y] = 2
-            z += 1
-
-    # Place killer robots.
-    r_pos = []
-    r = 0
-    while r < robots:
-        r_x, r_y = random.randint(1, 19), random.randint(1, 19)
-        if arena[r_x][r_y] == 0:
-            arena[r_x][r_y] = 3
-            r_pos.append([r_x, r_y])
-            r += 1
-
-    # Place agent.
-    a = 0
-    while a < 1:
-        a_x, a_y = random.randint(1, 19), random.randint(1, 19)
-        a += 1
-        if arena[a_x][a_y] == 0:
-            # Check for neigbouring robots.
-            for x in range(-1, 2):
-                for y in range(-1, 2):
-                    if arena[a_x + x][a_y + y] == 3:
-                        a = 0
-        else:
-            a = 0
-    arena[a_x][a_y] = 4
-    a_pos = [a_x, a_y]
-
-    return arena, r_pos, a_pos
-
-
-def look(arena, loc, tar):
-    return arena[loc[0] + tar[0]][loc[1] + tar[1]]
-
-
-def move(arena, loc, tar, element):
-    arena[loc[0]][loc[1]] = 0
-    arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
-
-
 class ChaseEnv(gym.Env):
     """
     Chase is based on a text game first created in the 1970's and featured
@@ -153,6 +96,60 @@ class ChaseEnv(gym.Env):
             9: np.array([-1, 1]),
         }
 
+    def _generate_arena(robots=5, random_seed=0):
+        random.seed(random_seed)
+        ax, ay = 20, 20
+        arena = np.zeros((ax, ay), dtype=np.uint8)
+
+        # Create boundary zappers.
+        for i in range(ax):
+            for j in range(ay):
+                if j in [0, ay-1] or i in [0, ax-1]:
+                    arena[i][j] = 1
+
+        # Place random zappers.
+        z = 0
+        while z < 10:
+            z_x, z_y = random.randint(1, 19), random.randint(1, 19)
+            if arena[z_x][z_y] == 0:
+                arena[z_x][z_y] = 2
+                z += 1
+
+        # Place killer robots.
+        r_pos = []
+        r = 0
+        while r < robots:
+            r_x, r_y = random.randint(1, 19), random.randint(1, 19)
+            if arena[r_x][r_y] == 0:
+                arena[r_x][r_y] = 3
+                r_pos.append([r_x, r_y])
+                r += 1
+
+        # Place agent.
+        a = 0
+        while a < 1:
+            a_x, a_y = random.randint(1, 19), random.randint(1, 19)
+            a += 1
+            if arena[a_x][a_y] == 0:
+                # Check for neigbouring robots.
+                for x in range(-1, 2):
+                    for y in range(-1, 2):
+                        if arena[a_x + x][a_y + y] == 3:
+                            a = 0
+            else:
+                a = 0
+        arena[a_x][a_y] = 4
+        a_pos = [a_x, a_y]
+
+        return arena, r_pos, a_pos
+
+    def _look(arena, loc, tar):
+        return arena[loc[0] + tar[0]][loc[1] + tar[1]]
+
+    def _move(arena, loc, tar, element):
+        arena[loc[0]][loc[1]] = 0
+        arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
+
     def step(self, action):
         r = 0
         a_pos = self.a_pos
@@ -161,14 +158,14 @@ class ChaseEnv(gym.Env):
         a_move = self.action_to_direction[action]
 
         # Assess agent move.
-        if look(self.arena, a_pos, a_move) in [1, 2, 3]:
+        if self._look(self.arena, a_pos, a_move) in [1, 2, 3]:
             # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
             self.arena[a_pos[0]][a_pos[1]] = 0
             r -= 1
             done = True
         else:
             # Move agent (vacate location and set new location).
-            move(self.arena, a_pos, a_move, element=4)
+            self._move(self.arena, a_pos, a_move, element=4)
 
         # Even if zapped, need to update agent for possible pyhrric reward.
         a_pos[0] += a_move[0]
@@ -189,7 +186,7 @@ class ChaseEnv(gym.Env):
             else:
                 r_move = [0, np.sign(tar_y)]
 
-            tar_look = look(self.arena, r_pos[robot], r_move)
+            tar_look = self._look(self.arena, r_pos[robot], r_move)
 
             # Check to make sure robots don't move on top of each other.
             if tar_look == 3:
@@ -208,7 +205,7 @@ class ChaseEnv(gym.Env):
                 r_del.append(robot)
                 r += 1
             else:  # Update robot position.
-                move(self.arena, r_pos[robot], r_move, element=3)
+                self._move(self.arena, r_pos[robot], r_move, element=3)
                 r_pos[robot][0] += r_move[0]
                 r_pos[robot][1] += r_move[1]
             robot += 1
@@ -227,7 +224,7 @@ class ChaseEnv(gym.Env):
         return self.arena, r, done, False, info
 
     def reset(self, seed=None, options=None):
-        self.arena, self.r_pos, self.a_pos = generate_arena(random_seed=seed)
+        self.arena, self.r_pos, self.a_pos = self._generate_arena(random_seed=seed)
         # TODO: Add info. For now return an empty dict.
         info = {}
 
