@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import random
 
-import gym
+import gymnasium as gym
 from gym import spaces
 
 
