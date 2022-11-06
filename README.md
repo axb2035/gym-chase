@@ -43,31 +43,31 @@ robots will still move completing the 'step'.
 
 An example state looks like this:
 ```
-1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 3. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 3. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 3. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 2. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 0. 2. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 3. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 4. 0. 0. 3. 1.
-1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 2. 0. 0. 1.
-1. 0. 0. 0. 0. 2. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1.
-1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.
+    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X 
+    X                                                        X 
+    X                          X                             X 
+    X                                R                       X 
+    X                          X        R                    X 
+    X                                                        X 
+    X                                                        X 
+    X                                                     R  X 
+    X                                                        X 
+    X                                                        X 
+    X           X  X                                         X 
+    X                                                        X 
+    X                                                        X 
+    X                             X           X              X 
+    X                                R                       X 
+    X                                                        X 
+    X                                   X        A        R  X 
+    X              X                                X        X 
+    X              X                                         X 
+    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X 
 ```
-1. Boundary zapper.
-2. Random zapper.
-3. Robot.
-4. Agent.
+X : Boundary zapper
+X : Random zapper
+R : Robot
+A : Agent
 
 The aim of the game is for the agent to eliminate the robots by placing 
 a zapper between the agent and robot so the robot moves into a zapper in 
@@ -108,16 +108,29 @@ above).
 
 ## Todo / Future expansion
 
+- Address env_checker warnings.
+- Remove human agent from `chase_play` repo and make the env work with 
+`play(gymnasium.make('gym_chase:Chase-v1'))`.
+- Make everything more 'gymthonic'.
+- Add `.` to text render to differentiate locations from formatting spaces.
+- Add `pygame` render option.
 - Create a different reward function to encourage elimanting the robots as
 quickly as possible.
-- Make the environment more 'stochastic' by add some random variation to the 
-robots i.e. 0.1 chance of going to the left or right of the 'deterministic' 
-move to close the gap on the agent.
-- Reinstate the original 'Jump' function where you would be transported to a 
-random square when the agent had no hope of winning. Though this could land the
-agent on a robot or zapper so it wasn't a gaurenteed escape plan!
-- Reinstate that robots moving into each other are both eliminated.
+- Make the environment more 'stochastic' by adding option for some random 
+variation to the robots i.e. 0.1 chance of going to the left or right of the 
+'deterministic' move to close the gap on the agent.
+- Add option for zappers blocking line of sight (LOS) between agent and robots. 
+If robots lose LOS then they will not move or take a random move that doesn't
+take them into a zapper.
+- Add option for "fog" so the robots position is not exactly known until 
+closer to the Agent.
+- Add option for the original 'Jump' action where the Agent would be 
+teleported to a random square. Generally used when the agent was about to be 
+caught. Though this could land the agent on a robot or zapper so it wasn't a 
+guaranteed escape plan!
+- Add option that robots moving into each other are both eliminated.
 - Any improvements in coding that are suggested.
 
 ## Thanks to
 - Eike and everyone at the Melbourne MLAI Bookclub for insightful feedback.
+- The original developers and maintainers of the gym library. :)
