@@ -76,11 +76,19 @@ class ChaseEnv(gym.Env):
 
     def __init__(self, render_mode=None):
         self.render_mode = render_mode
+        self.size = 20
 
-        self.observation_space = spaces.Box(low=0,
-                                            high=4,
-                                            shape=(20, 20),
-                                            dtype=np.uint8)
+        self.observation_space = spaces.Dict(
+            {
+                "agent": spaces.Box(0, self.size-1, shape=(2,), dtype=int),
+                "robots": spaces.Box(0, self.size-1, shape=(2, 5), dtype=int),
+                "zappers": spaces.Box(0, self.size-1, shape=(2, 10), dtype=int)
+            }
+        )
+        # self.observation_space = spaces.Box(low=0,
+        #                                     high=4,
+        #                                     shape=(20, 20),
+        #                                     dtype=np.uint8)
 
         self.action_space = spaces.Discrete(9,)
 
@@ -98,50 +106,31 @@ class ChaseEnv(gym.Env):
 
     def _generate_arena(self, robots=5, random_seed=0):
         random.seed(random_seed)
-        ax, ay = 20, 20
-        arena = np.zeros((ax, ay), dtype=np.uint8)
 
-        # Create boundary zappers.
-        for i in range(ax):
-            for j in range(ay):
-                if j in [0, ay-1] or i in [0, ax-1]:
-                    arena[i][j] = 1
+        # Place 10 zappers.
+        zapper_list = np.empty((0, 2), int)
+        while len(zapper_list) < 10:
+            loc = np.array([[random.randint(1, 18), random.randint(1, 18)]])
+            if loc not in zapper_list:
+                zapper_list = np.append(zapper_list, loc, axis=0)
 
-        # Place random zappers.
-        z = 0
-        while z < 10:
-            z_x, z_y = random.randint(1, 19), random.randint(1, 19)
-            if arena[z_x][z_y] == 0:
-                arena[z_x][z_y] = 2
-                z += 1
+        # Place robots.
+        robot_list = np.empty((0, 2), int)
+        while len(robot_list) < robots:
+            loc = np.array([[random.randint(1, 18), random.randint(1, 18)]])
+            if (loc not in zapper_list) and (loc not in robot_list):
+                robot_list = np.append(robot_list, loc, axis=0)
 
-        # Place killer robots.
-        r_pos = []
-        r = 0
-        while r < robots:
-            r_x, r_y = random.randint(1, 19), random.randint(1, 19)
-            if arena[r_x][r_y] == 0:
-                arena[r_x][r_y] = 3
-                r_pos.append([r_x, r_y])
-                r += 1
+        # Place Agent.
+        agent_pos = None
+        while agent_pos is None:
+            location = np.array([random.randint(1, 18), random.randint(1, 18)])
+            if (location not in zapper_list) and (location not in robot_list):
+                agent_pos = location
 
-        # Place agent.
-        a = 0
-        while a < 1:
-            a_x, a_y = random.randint(1, 19), random.randint(1, 19)
-            a += 1
-            if arena[a_x][a_y] == 0:
-                # Check for neigbouring robots.
-                for x in range(-1, 2):
-                    for y in range(-1, 2):
-                        if arena[a_x + x][a_y + y] == 3:
-                            a = 0
-            else:
-                a = 0
-        arena[a_x][a_y] = 4
-        a_pos = [a_x, a_y]
-
-        return arena, r_pos, a_pos
+        return {"zappers": zapper_list,
+                "robots": robot_list,
+                "agent": agent_pos}
 
     def _look(self, arena, loc, tar):
         return arena[loc[0] + tar[0]][loc[1] + tar[1]]
@@ -152,97 +141,130 @@ class ChaseEnv(gym.Env):
 
     def step(self, action):
         r = 0
-        a_pos = self.a_pos
-        r_pos = self.r_pos
         done = False
-        a_move = self.action_to_direction[action]
 
-        # Assess agent move.
-        if self._look(self.arena, a_pos, a_move) in [1, 2, 3]:
-            # ZZZAAAAPPPPP!!!! - agent ran into a boundary, zapper or robot.
-            self.arena[a_pos[0]][a_pos[1]] = 0
-            r -= 1
+        # Move agent.
+        self.game_state['agent'] += self.action_to_direction[action]
+
+        # Assess agent move - did it run into a boundary, zapper or robot?
+        if self.game_state['agent'][0] in [0, 19]:
             done = True
-        else:
-            # Move agent (vacate location and set new location).
-            self._move(self.arena, a_pos, a_move, element=4)
+        if self.game_state['agent'][1] in [0, 19]:
+            done = True
+        if (self.game_state['agent'] == self.game_state['zappers']).all(1).any():
+            done = True
+        if (self.game_state['agent'] == self.game_state['robots']).all(1).any():
+            done = True
 
-        # Even if zapped, need to update agent for possible pyhrric reward.
-        a_pos[0] += a_move[0]
-        a_pos[1] += a_move[1]
+        if done:
+            # ZZZAAAAPPPPP!!!! - agent ran into the boundary, zapper or robot.
+            r = -1
 
         # Robots turn!
+        # Even if Agent dies, complete step for possible pyhrric reward.
         robot = 0
-        r_del = []
-        while robot < len(r_pos):
-            # Which way to the player?
-            tar_x = a_pos[0] - r_pos[robot][0]
-            tar_y = a_pos[1] - r_pos[robot][1]
+        robot_del = []
+        a_pos = self.game_state['agent']
+        # Iterate through robots moving and assessing.
+        while robot < len(self.game_state['robots']):
+            r_pos = self.game_state['robots'][robot]
+
+            # Which way to the agent?
+            tar_x = a_pos[0] - r_pos[0]
+            tar_y = a_pos[1] - r_pos[1]
 
             if abs(tar_x) == abs(tar_y):
-                r_move = [np.sign(tar_x), np.sign(tar_y)]
+                r_move = np.array([np.sign(tar_x), np.sign(tar_y)])
             elif abs(tar_x) > abs(tar_y):
-                r_move = [np.sign(tar_x), 0]
+                r_move = np.array([np.sign(tar_x), 0])
             else:
-                r_move = [0, np.sign(tar_y)]
+                r_move = np.array([0, np.sign(tar_y)])
 
-            tar_look = self._look(self.arena, r_pos[robot], r_move)
+            # Commit move if not moving onto another robot.
+            r_clash = r_pos + r_move
 
-            # Check to make sure robots don't move on top of each other.
-            if tar_look == 3:
-                r_move = [0, 0]
+            if not (r_clash == self.game_state['robots']).all(1).any():
+                r_pos += r_move
+                self.game_state['robots'][robot] = r_pos
 
             # Has robot caught the player?
-            if tar_look == 4:
-                # ZZZAAAAPPPPP!!!! - Agent was caught by a robot.
-                r -= 1
-                done = True
+            if np.array_equal(r_pos, a_pos):
+                # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
+                # Unless Agent already zapped. No multiple penalty.
+                if not done:
+                    r -= 1
+                    done = True
 
-            # Check if robot done something stupid otherwise update position.
-            if tar_look in [1, 2]:
+            # Check if robot done something stupid.
+            r_zapped = False
+            if r_pos[0] in [0, 19]:
+                r_zapped = True
+            elif r_pos[1] in [0, 19]:
+                r_zapped = True
+            elif (r_pos == self.game_state['zappers']).all(1).any():
+                r_zapped = True
+
+            if r_zapped:
                 # ZZZAAAAPPPPP!!!! - Fried robot.
-                self.arena[r_pos[robot][0]][r_pos[robot][1]] = 0
-                r_del.append(robot)
+                robot_del.append(robot)
                 r += 1
-            else:  # Update robot position.
-                self._move(self.arena, r_pos[robot], r_move, element=3)
-                r_pos[robot][0] += r_move[0]
-                r_pos[robot][1] += r_move[1]
+
             robot += 1
 
         # Clean out eliminated robots.
+        # As the array changes shape as elements are removed target position
+        # needs to be adjusted.
+        # TODO: investigate doing this in one pass with a mask.
         r_adj = 0
-        for r_dead in r_del:
-            del r_pos[r_dead - r_adj]
+        for r_dead in robot_del:
+            del_pos = [r_dead - r_adj]
+            self.game_state['robots'] = np.delete(self.game_state['robots'], del_pos, 0)
             r_adj += 1
-        if len(r_pos) == 0:
-            done = True  # All robots eliminated.
 
+        # All robots eliminated? Game over!
+        if len(self.game_state['robots']) == 0:
+            done = True
+
+        observation = self.game_state
         # TODO: Add info. For now return an empty dict.
         info = {}
 
-        return self.arena, r, done, False, info
+        return observation, r, done, False, info
 
     def reset(self, seed=None, options=None):
-        self.arena, self.r_pos, self.a_pos = self._generate_arena(random_seed=seed)
+        self.game_state = self._generate_arena(random_seed=seed)
+
+        observation = self.game_state
         # TODO: Add info. For now return an empty dict.
         info = {}
 
-        return self.arena, info
+        return observation, info
 
     def render(self):
         outfile = sys.stdout
 
-        arena_human = np.array2string(self.arena)
+        # arena = np.empty((self.size, self.size), dtype='str')
+        arena = list()
 
-        arena_human = np.char.replace(arena_human, '0', ' ')
-        arena_human = np.char.replace(arena_human, '1', 'X')
-        arena_human = np.char.replace(arena_human, '2', 'X')
-        arena_human = np.char.replace(arena_human, '3', 'R')
-        arena_human = np.char.replace(arena_human, '4', 'A')
-        arena_human = np.char.replace(arena_human, '[', '')
-        arena_human = np.char.replace(arena_human, ']', '')
+        # Add the boundaries and fill others positions with spaces.
+        for x in range(self.size):
+            row = list()
+            for y in range(self.size):
+                if x in [0, 19]:
+                    row.append("X")
+                elif y in [0, 19]:
+                    row.append("X")
+                else:
+                    row.append(" ")
+            arena.append(row)
 
-        output = ' ' + '\n'.join(arena_human.ravel())
+        # Plug in the positions of the agent, robots and zappers.
+        a = self.game_state['agent']
+        arena[a[0]][a[1]] = "A"
+        for r in self.game_state['robots']:
+            arena[r[0]][r[1]] = "R"
+        for z in self.game_state['zappers']:
+            arena[z[0]][z[1]] = "X"
+        output = '\n'.join(['  '.join([col for col in row]) for row in arena])
 
         outfile.write(output)
