@@ -35,11 +35,12 @@ This gives the agent nine possible actions per step.
 
 Besides the zappers there are also five robots which move towards the
 agent each step. The robots have no self-preservation instincts and will
-move into a zapper in an attempt to get closer to the agent. If a robot 
-moves into the same square as the agent the agent is eliminated and the
-episode ends. If a robot wants to move to a square which is occupied
-by another robot it will not move. If the agent moves into a zapper the
-robots will still move completing the 'step'.    
+move into a zapper in an attempt to get closer to the agent. 
+
+The agent is eliminated if a robot moves into the same square. If a robot 
+tries to move to a square which is occupied by another robot it will not move. 
+If the agent moves into a zapper the robots will still move completing the 
+'step' for a possible pyhrric reward.
 
 An example state looks like this:
 ```
@@ -80,7 +81,8 @@ The episode ends when:
 - all robots are eliminated.
 
 The agent receives a reward of 1 for each robot eliminated, -1 if the agent
-is eliminated and zero otherwise.
+is eliminated and zero otherwise. The Agency elimination penalty is only 
+applied once per step.
 
 ## Notes
 
@@ -88,11 +90,11 @@ When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
 a different starting position:
 ```
-env.reset(random_seed=101)
+env.reset(seed=101)
 ```
 It may be possible to get a never ending sequence of moves between the agent 
-and one remaining robot. Recommend putting a step ceiling on any agent to
-ensure episode will end.
+and one remaining robot (though I haven't proven it yet). Recommend putting a 
+step ceiling on any agent to ensure episode will end.
 
 ## Performance tables
 The following are agents that you can benchmark against. The validation set for 
@@ -113,7 +115,7 @@ above).
 - Remove human agent from `chase_play` repo and make the env work with 
 `play(gymnasium.make('gym_chase:Chase-v1'))`.
 - Make everything more 'gymthonic'.
-- Add `.` to text render to differentiate locations from formatting spaces.
+- Add render option `machine` to omit spaces used for padding on stdout.
 - Add `pygame` render option.
 - Create a different reward function to encourage elimanting the robots as
 quickly as possible.
