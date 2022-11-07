@@ -10,7 +10,7 @@ The challenge is to build a reinforcement learning agent that can consistently
 eliminate all robots without getting eliminated itself.
 
 ## Installation
-To use gym-chase ```gym``` needs to be installed into your target virtual 
+To use gym-chase `gym` needs to be installed into your target virtual 
 environment. To install gym-chase activate your target virtual environment and
 type:
 ```
@@ -27,11 +27,13 @@ Each step an agent can move horiziontally one square, vertically one
 square, a combination of one vertcal and horiziontal square or not move.
 This gives the agent nine possible actions per step.
 
+```
 	7  8  9
 	 \ | /
 	4- 5 -6
 	 / | \
 	1  2  3
+```
 
 Besides the zappers there are also five robots which move towards the
 agent each step. The robots have no self-preservation instincts and will
@@ -64,12 +66,13 @@ An example state looks like this:
     X  .  .  .  .  .  .  X  .  .  .  .  .  .  .  .  .  .  .  X
     X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  R  X
     X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X
-```
+
 X : Boundary zapper
 X : Random zapper
 R : Robot
 A : Agent
 . : Empty
+```
 
 The aim of the game is for the agent to eliminate the robots by placing 
 a zapper between the agent and robot so the robot moves into a zapper in 
@@ -81,7 +84,7 @@ The episode ends when:
 - all robots are eliminated.
 
 The agent receives a reward of 1 for each robot eliminated, -1 if the agent
-is eliminated and zero otherwise. The Agency elimination penalty is only 
+is eliminated and zero otherwise. The agent elimination penalty is only 
 applied once per step.
 
 ## Notes
