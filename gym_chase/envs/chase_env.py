@@ -159,8 +159,9 @@ class ChaseEnv(gym.Env):
         # Robots turn!
         # Even if Agent dies, complete step for possible pyhrric reward.
         robot = 0
-        robot_del = []
+        robot_del = list()
         a_pos = self.game_state['agent']
+
         # Iterate through robots moving and assessing.
         while robot < len(self.game_state['robots']):
             r_pos = self.game_state['robots'][robot]
@@ -186,12 +187,12 @@ class ChaseEnv(gym.Env):
             # Has robot caught the player?
             if np.array_equal(r_pos, a_pos):
                 # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
-                # Unless Agent already zapped. No multiple penalty.
+                # No extra reward penalty if Agent already zapped.
                 if not done:
                     r -= 1
                     done = True
 
-            # Check if robot done something stupid.
+            # Check if robot has done something stupid.
             r_zapped = False
             if r_pos[0] in [0, 19]:
                 r_zapped = True
@@ -202,20 +203,15 @@ class ChaseEnv(gym.Env):
 
             if r_zapped:
                 # ZZZAAAAPPPPP!!!! - Fried robot.
-                robot_del.append(robot)
+                robot_del.append(True)
                 r += 1
+            else:
+                robot_del.append(False)
 
             robot += 1
 
         # Clean out eliminated robots.
-        # As the array changes shape as elements are removed target position
-        # needs to be adjusted.
-        # TODO: investigate doing this in one pass with a mask.
-        r_adj = 0
-        for r_dead in robot_del:
-            del_pos = [r_dead - r_adj]
-            self.game_state['robots'] = np.delete(self.game_state['robots'], del_pos, 0)
-            r_adj += 1
+        self.game_state['robots'] = np.delete(self.game_state['robots'], robot_del, 0)
 
         # All robots eliminated? Game over!
         if len(self.game_state['robots']) == 0:
