@@ -1,7 +1,8 @@
 # gym-chase
 ## A toy text gym environment based on Chase.
 
-Chase is based on a text game I first saw in the 1970's and featured
+Chase is based on a text game I first saw in the 1970's on a Nixdorf mini
+computer (pretty sure it was a 8870/M55) and featured
 in a number of 1980's personal computer programming books. See:
 https://www.atariarchives.org/morebasicgames/showpage.php?page=26
 for an example.
