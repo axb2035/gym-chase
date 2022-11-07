@@ -85,10 +85,6 @@ class ChaseEnv(gym.Env):
                 "zappers": spaces.Box(0, self.size-1, shape=(2, 10), dtype=int)
             }
         )
-        # self.observation_space = spaces.Box(low=0,
-        #                                     high=4,
-        #                                     shape=(20, 20),
-        #                                     dtype=np.uint8)
 
         self.action_space = spaces.Discrete(9,)
 
@@ -242,8 +238,6 @@ class ChaseEnv(gym.Env):
 
     def render(self):
         outfile = sys.stdout
-
-        # arena = np.empty((self.size, self.size), dtype='str')
         arena = list()
 
         # Add the boundaries and fill others positions with spaces.
