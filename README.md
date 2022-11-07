@@ -43,31 +43,32 @@ robots will still move completing the 'step'.
 
 An example state looks like this:
 ```
-    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X 
-    X                                                        X 
-    X                          X                             X 
-    X                                R                       X 
-    X                          X        R                    X 
-    X                                                        X 
-    X                                                        X 
-    X                                                     R  X 
-    X                                                        X 
-    X                                                        X 
-    X           X  X                                         X 
-    X                                                        X 
-    X                                                        X 
-    X                             X           X              X 
-    X                                R                       X 
-    X                                                        X 
-    X                                   X        A        R  X 
-    X              X                                X        X 
-    X              X                                         X 
-    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X 
+    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X
+    X  X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  R  .  .  X
+    X  .  A  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  X  .  .  .  .  .  .  .  X
+    X  .  .  X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X  .  X
+    X  .  .  .  .  .  .  .  .  R  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  X  .  .  .  .  .  .  X
+    X  .  .  .  X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  R  .  .  .  .  .  X
+    X  .  .  .  .  R  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  X  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  X  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X  .  .  .  X
+    X  .  .  .  .  .  .  X  .  .  .  .  .  .  .  .  .  .  .  X
+    X  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  R  X
+    X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X
 ```
 X : Boundary zapper
 X : Random zapper
 R : Robot
 A : Agent
+. : Empty
 
 The aim of the game is for the agent to eliminate the robots by placing 
 a zapper between the agent and robot so the robot moves into a zapper in 
