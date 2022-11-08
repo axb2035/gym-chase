@@ -103,7 +103,7 @@ step ceiling on any agent to ensure episode will end.
 ## Performance tables
 The following are agents that you can benchmark against. The validation set for 
 non-human is for the first 10,000 arenas (to set a starting arena see notes 
-above).
+above). Gerneated using v0 of the environment.
 
 | Agent   | mean r  | % won (r=5) |
 | :-------|:-------:|:-----------:|

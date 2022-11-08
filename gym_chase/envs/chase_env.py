@@ -101,6 +101,9 @@ class ChaseEnv(gym.Env):
             9: np.array([-1, 1]),
         }
 
+    def get_keys_to_action(self):
+        return self.action_to_direction
+
     def _generate_arena(self, robots=5, random_seed=0):
         random.seed(random_seed)
 
