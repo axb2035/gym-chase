@@ -158,10 +158,6 @@ class ChaseEnv(gym.Env):
         elif (self.game_state['agent'] == self.game_state['robots']).all(1).any():
             terminated = True
 
-        if terminated:
-            # ZZZAAAAPPPPP!!!! - agent ran into the boundary, zapper or robot.
-            r = -1
-
         # Robots turn!
         # Even if Agent dies, complete step for possible pyhrric reward.
         robot = 0
@@ -193,10 +189,7 @@ class ChaseEnv(gym.Env):
             # Has robot caught the player?
             if np.array_equal(r_pos, a_pos):
                 # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
-                # No extra reward penalty if Agent already zapped.
-                if not terminated:
-                    r -= 1
-                    terminated = True
+                terminated = True
 
             # Check if robot has done something stupid.
             r_zapped = False
@@ -215,6 +208,12 @@ class ChaseEnv(gym.Env):
                 robot_del.append(False)
 
             robot += 1
+
+        # If the episode has been terminated then we know if the agent has
+        # been eliminated by moving into a zapper or robot, or the agent
+        # been caught by a robot.
+        if terminated:
+            r -= 1
 
         # Clean out eliminated robots.
         self.game_state['robots'] = np.delete(self.game_state['robots'], robot_del, 0)
