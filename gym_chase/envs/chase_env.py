@@ -141,22 +141,24 @@ class ChaseEnv(gym.Env):
 
     def step(self, action):
         r = 0
-        done = False
+        terminated = False
+        # Episodes are never truncated.
+        truncated = False
 
         # Move agent.
         self.game_state['agent'] += self.action_to_direction[action]
 
         # Assess agent move - did it run into a boundary, zapper or robot?
         if self.game_state['agent'][0] in [0, 19]:
-            done = True
+            terminated = True
         if self.game_state['agent'][1] in [0, 19]:
-            done = True
+            terminated = True
         if (self.game_state['agent'] == self.game_state['zappers']).all(1).any():
-            done = True
+            terminated = True
         if (self.game_state['agent'] == self.game_state['robots']).all(1).any():
-            done = True
+            terminated = True
 
-        if done:
+        if terminated:
             # ZZZAAAAPPPPP!!!! - agent ran into the boundary, zapper or robot.
             r = -1
 
@@ -192,9 +194,9 @@ class ChaseEnv(gym.Env):
             if np.array_equal(r_pos, a_pos):
                 # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
                 # No extra reward penalty if Agent already zapped.
-                if not done:
+                if not terminated:
                     r -= 1
-                    done = True
+                    terminated = True
 
             # Check if robot has done something stupid.
             r_zapped = False
@@ -219,13 +221,13 @@ class ChaseEnv(gym.Env):
 
         # All robots eliminated? Game over!
         if len(self.game_state['robots']) == 0:
-            done = True
+            terminated = True
 
         observation = self.game_state
         # TODO: Add info. For now return an empty dict.
         info = {}
 
-        return observation, r, done, False, info
+        return observation, r, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
         self.game_state = self._generate_arena(random_seed=seed)
