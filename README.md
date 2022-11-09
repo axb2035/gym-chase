@@ -1,5 +1,5 @@
 # gym-chase
-## A toy text gym environment based on Chase.
+## A toy text gymnasium environment based on Chase.
 
 Chase is based on a text game I first saw in the 1970's on a Nixdorf mini
 computer (pretty sure it was a 8870/M55) and featured
@@ -11,7 +11,7 @@ The challenge is to build a reinforcement learning agent that can consistently
 eliminate all robots without getting eliminated itself.
 
 ## Installation
-To use gym-chase `gym` needs to be installed into your target virtual 
+To use gym-chase `gymnasium` needs to be installed into your target virtual 
 environment. To install gym-chase activate your target virtual environment and
 type:
 ```
@@ -140,4 +140,5 @@ guaranteed escape plan!
 
 ## Thanks to
 - Eike and everyone at the Melbourne MLAI Bookclub for insightful feedback.
-- The original developers and maintainers of the gym library. :)
+- The original developers and maintainers of the original gym and new 
+gynamsium libraries. :)
