@@ -151,11 +151,11 @@ class ChaseEnv(gym.Env):
         # Assess agent move - did it run into a boundary, zapper or robot?
         if self.game_state['agent'][0] in [0, 19]:
             terminated = True
-        if self.game_state['agent'][1] in [0, 19]:
+        elif self.game_state['agent'][1] in [0, 19]:
             terminated = True
-        if (self.game_state['agent'] == self.game_state['zappers']).all(1).any():
+        elif (self.game_state['agent'] == self.game_state['zappers']).all(1).any():
             terminated = True
-        if (self.game_state['agent'] == self.game_state['robots']).all(1).any():
+        elif (self.game_state['agent'] == self.game_state['robots']).all(1).any():
             terminated = True
 
         if terminated:
