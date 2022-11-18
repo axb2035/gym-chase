@@ -1,3 +1,5 @@
+"""Setup gym-chase project."""
+
 from setuptools import setup
 
 setup(

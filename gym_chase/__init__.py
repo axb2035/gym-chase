@@ -1,3 +1,4 @@
+"""Root `__init__` of the gym-chase module."""
 from gymnasium.envs.registration import register
 
 # Toy Text

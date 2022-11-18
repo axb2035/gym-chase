@@ -1,3 +1,4 @@
+"""Gymnasium gym-chase toy_text environment."""
 import random
 import sys
 
@@ -7,7 +8,8 @@ from gymnasium import spaces
 
 
 class ChaseEnv(gym.Env):
-    """
+    """gym-chase is a toy_text environment for the gymnasium RL library.
+
     Chase is based on a text game first created in the 1970's and featured
     in a number of 1980's personal computer programming books. See:
     https://www.atariarchives.org/morebasicgames/showpage.php?page=26
@@ -76,6 +78,7 @@ class ChaseEnv(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 1}
 
     def __init__(self, render_mode=None):
+        """Setup action and observation spaces, default keymap and arena size."""
         self.render_mode = render_mode
         self.size = 20
 
@@ -104,9 +107,19 @@ class ChaseEnv(gym.Env):
         }
 
     def get_keys_to_action(self):
+        """Return default keymap for chase."""
         return self.action_to_direction
 
     def _generate_arena(self, robots=5, random_seed=0):
+        """Generates a random valid map.
+
+        Args:
+            robots: number of robots to place.
+            random_seed: seed used to generate arena. Allows consistent sequence generation.
+
+        Returns:
+            A random valid map
+        """
         random.seed(random_seed)
 
         # Place 10 zappers.
@@ -133,16 +146,19 @@ class ChaseEnv(gym.Env):
         return {"zappers": zapper_list, "robots": robot_list, "agent": agent_pos}
 
     def _look(self, arena, loc, tar):
+        """Return what is in target offset [x,y] next to location [x, y]."""
         return arena[loc[0] + tar[0]][loc[1] + tar[1]]
 
     def _move(self, arena, loc, tar, element):
+        """Update location of game element to location [x, y] using move tat[x, y]."""
         arena[loc[0]][loc[1]] = 0
         arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
 
     def step(self, action):
+        """Move agent based on feedback, move robots in response and assess outcomes."""
         r = 0
         terminated = False
-        # Episodes are never truncated.
+        # Episodes are never truncated. Unless there is a wrapper with a timer.
         truncated = False
 
         # Move agent.
@@ -229,6 +245,7 @@ class ChaseEnv(gym.Env):
         return observation, r, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
+        """Returns a new arena based on random_seed."""
         self.game_state = self._generate_arena(random_seed=seed)
 
         observation = self.game_state
@@ -238,6 +255,7 @@ class ChaseEnv(gym.Env):
         return observation, info
 
     def render(self):
+        """Returns a text representation of the observation space."""
         outfile = sys.stdout
         arena = list()
 
