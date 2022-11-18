@@ -145,15 +145,6 @@ class ChaseEnv(gym.Env):
 
         return {"zappers": zapper_list, "robots": robot_list, "agent": agent_pos}
 
-    def _look(self, arena, loc, tar):
-        """Return what is in target offset [x,y] next to location [x, y]."""
-        return arena[loc[0] + tar[0]][loc[1] + tar[1]]
-
-    def _move(self, arena, loc, tar, element):
-        """Update location of game element to location [x, y] using move tat[x, y]."""
-        arena[loc[0]][loc[1]] = 0
-        arena[loc[0] + tar[0]][loc[1] + tar[1]] = element
-
     def step(self, action):
         """Move agent based on feedback, move robots in response and assess outcomes."""
         r = 0
