@@ -4,6 +4,6 @@ from gymnasium.envs.registration import register
 # ----------------------------------------
 
 register(
-    id='Chase-v1',
-    entry_point='gym_chase.envs:ChaseEnv',
+    id="Chase-v1",
+    entry_point="gym_chase.envs:ChaseEnv",
 )

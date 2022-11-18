@@ -1,8 +1,8 @@
-import sys
-import numpy as np
 import random
+import sys
 
 import gymnasium as gym
+import numpy as np
 from gymnasium import spaces
 
 
@@ -73,7 +73,7 @@ class ChaseEnv(gym.Env):
 
     """
 
-    metadata = {'render_modes': ['human'], "render_fps": 1}
+    metadata = {"render_modes": ["human"], "render_fps": 1}
 
     def __init__(self, render_mode=None):
         self.render_mode = render_mode
@@ -81,13 +81,15 @@ class ChaseEnv(gym.Env):
 
         self.observation_space = spaces.Dict(
             {
-                "agent": spaces.Box(0, self.size-1, shape=(2,), dtype=int),
-                "robots": spaces.Box(0, self.size-1, shape=(2, 5), dtype=int),
-                "zappers": spaces.Box(0, self.size-1, shape=(2, 10), dtype=int)
+                "agent": spaces.Box(0, self.size - 1, shape=(2,), dtype=int),
+                "robots": spaces.Box(0, self.size - 1, shape=(2, 5), dtype=int),
+                "zappers": spaces.Box(0, self.size - 1, shape=(2, 10), dtype=int),
             }
         )
 
-        self.action_space = spaces.Discrete(9,)
+        self.action_space = spaces.Discrete(
+            9,
+        )
 
         self.action_to_direction = {
             1: np.array([1, -1]),
@@ -128,9 +130,7 @@ class ChaseEnv(gym.Env):
             if (location not in zapper_list) and (location not in robot_list):
                 agent_pos = location
 
-        return {"zappers": zapper_list,
-                "robots": robot_list,
-                "agent": agent_pos}
+        return {"zappers": zapper_list, "robots": robot_list, "agent": agent_pos}
 
     def _look(self, arena, loc, tar):
         return arena[loc[0] + tar[0]][loc[1] + tar[1]]
@@ -146,27 +146,27 @@ class ChaseEnv(gym.Env):
         truncated = False
 
         # Move agent.
-        self.game_state['agent'] += self.action_to_direction[action]
+        self.game_state["agent"] += self.action_to_direction[action]
 
         # Assess agent move - did it run into a boundary, zapper or robot?
-        if self.game_state['agent'][0] in [0, 19]:
+        if self.game_state["agent"][0] in [0, 19]:
             terminated = True
-        elif self.game_state['agent'][1] in [0, 19]:
+        elif self.game_state["agent"][1] in [0, 19]:
             terminated = True
-        elif (self.game_state['agent'] == self.game_state['zappers']).all(1).any():
+        elif (self.game_state["agent"] == self.game_state["zappers"]).all(1).any():
             terminated = True
-        elif (self.game_state['agent'] == self.game_state['robots']).all(1).any():
+        elif (self.game_state["agent"] == self.game_state["robots"]).all(1).any():
             terminated = True
 
         # Robots turn!
         # Even if Agent dies, complete step for possible pyhrric reward.
         robot = 0
         robot_del = list()
-        a_pos = self.game_state['agent']
+        a_pos = self.game_state["agent"]
 
         # Iterate through robots moving and assessing.
-        while robot < len(self.game_state['robots']):
-            r_pos = self.game_state['robots'][robot]
+        while robot < len(self.game_state["robots"]):
+            r_pos = self.game_state["robots"][robot]
 
             # Which way to the agent?
             tar_x = a_pos[0] - r_pos[0]
@@ -182,9 +182,9 @@ class ChaseEnv(gym.Env):
             # Commit move if not moving onto another robot.
             r_clash = r_pos + r_move
 
-            if not (r_clash == self.game_state['robots']).all(1).any():
+            if not (r_clash == self.game_state["robots"]).all(1).any():
                 r_pos += r_move
-                self.game_state['robots'][robot] = r_pos
+                self.game_state["robots"][robot] = r_pos
 
             # Has robot caught the player?
             if np.array_equal(r_pos, a_pos):
@@ -197,7 +197,7 @@ class ChaseEnv(gym.Env):
                 r_zapped = True
             elif r_pos[1] in [0, 19]:
                 r_zapped = True
-            elif (r_pos == self.game_state['zappers']).all(1).any():
+            elif (r_pos == self.game_state["zappers"]).all(1).any():
                 r_zapped = True
 
             if r_zapped:
@@ -216,10 +216,10 @@ class ChaseEnv(gym.Env):
             r -= 1
 
         # Clean out eliminated robots.
-        self.game_state['robots'] = np.delete(self.game_state['robots'], robot_del, 0)
+        self.game_state["robots"] = np.delete(self.game_state["robots"], robot_del, 0)
 
         # All robots eliminated? Game over!
-        if len(self.game_state['robots']) == 0:
+        if len(self.game_state["robots"]) == 0:
             terminated = True
 
         observation = self.game_state
@@ -254,12 +254,12 @@ class ChaseEnv(gym.Env):
             arena.append(row)
 
         # Plug in the positions of the agent, robots and zappers.
-        a = self.game_state['agent']
+        a = self.game_state["agent"]
         arena[a[0]][a[1]] = "A"
-        for r in self.game_state['robots']:
+        for r in self.game_state["robots"]:
             arena[r[0]][r[1]] = "R"
-        for z in self.game_state['zappers']:
+        for z in self.game_state["zappers"]:
             arena[z[0]][z[1]] = "X"
-        output = '\n'.join(['  '.join([col for col in row]) for row in arena])
+        output = "\n".join(["  ".join([col for col in row]) for row in arena])
 
         outfile.write(output)
