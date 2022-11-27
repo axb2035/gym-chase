@@ -4,7 +4,7 @@ import sys
 
 import gymnasium as gym
 import numpy as np
-from gymnasium import spaces
+from gymnasium.spaces import Box, Dict, Discrete
 
 
 class ChaseEnv(gym.Env):
@@ -81,18 +81,31 @@ class ChaseEnv(gym.Env):
         """Setup action and observation spaces, default keymap and arena size."""
         self.render_mode = render_mode
         self.size = 20
+        self.robots = 5
+        self.zappers = 10
 
-        self.observation_space = spaces.Dict(
+        robot_space = Dict()
+        for r in range(self.robots):
+            robot_space[r] = Dict(
+                {
+                    "alive": Discrete(2),
+                    "location": Box(0, self.size - 1, shape=(2,), dtype=np.int32),
+                }
+            )
+
+        zapper_space = Dict()
+        for z in range(self.zappers):
+            zapper_space[z] = Box(0, self.size - 1, shape=(2,), dtype=np.int32)
+
+        self.observation_space = Dict(
             {
-                "agent": spaces.Box(0, self.size - 1, shape=(2,), dtype=int),
-                "robots": spaces.Box(0, self.size - 1, shape=(2, 5), dtype=int),
-                "zappers": spaces.Box(0, self.size - 1, shape=(2, 10), dtype=int),
+                "agent": Box(0, self.size - 1, shape=(2,), dtype=np.int32),
+                "robots": robot_space,
+                "zappers": zapper_space,
             }
         )
 
-        self.action_space = spaces.Discrete(
-            9,
-        )
+        self.action_space = Discrete(9)
 
         self.action_to_direction = {
             1: np.array([1, -1]),
@@ -110,11 +123,10 @@ class ChaseEnv(gym.Env):
         """Return default keymap for chase."""
         return self.action_to_direction
 
-    def _generate_arena(self, robots=5, random_seed=0):
+    def _generate_arena(self, random_seed=0):
         """Generates a random valid map.
 
         Args:
-            robots: number of robots to place.
             random_seed: seed used to generate arena. Allows consistent sequence generation.
 
         Returns:
@@ -131,19 +143,23 @@ class ChaseEnv(gym.Env):
 
         # Place robots.
         robot_list = np.empty((0, 2), int)
-        while len(robot_list) < robots:
+        while len(robot_list) < self.robots:
             loc = np.array([[random.randint(1, 18), random.randint(1, 18)]])
             if (loc not in zapper_list) and (loc not in robot_list):
                 robot_list = np.append(robot_list, loc, axis=0)
 
-        # Place Agent.
+        # Place agent.
         agent_pos = None
         while agent_pos is None:
             location = np.array([random.randint(1, 18), random.randint(1, 18)])
             if (location not in zapper_list) and (location not in robot_list):
                 agent_pos = location
 
-        return {"zappers": zapper_list, "robots": robot_list, "agent": agent_pos}
+        # Convert lists to expected observation space.
+        robot_list = dict(enumerate([{"alive": 1, "location": r} for r in robot_list]))
+        zapper_list = dict(enumerate(zapper_list))
+
+        return {"agent": agent_pos, "robots": robot_list, "zappers": zapper_list}
 
     def step(self, action):
         """Move agent based on feedback, move robots in response and assess outcomes."""
@@ -154,67 +170,73 @@ class ChaseEnv(gym.Env):
 
         # Move agent.
         self.game_state["agent"] += self.action_to_direction[action]
-
-        # Assess agent move - did it run into a boundary, zapper or robot?
-        if self.game_state["agent"][0] in [0, 19]:
-            terminated = True
-        elif self.game_state["agent"][1] in [0, 19]:
-            terminated = True
-        elif (self.game_state["agent"] == self.game_state["zappers"]).all(1).any():
-            terminated = True
-        elif (self.game_state["agent"] == self.game_state["robots"]).all(1).any():
-            terminated = True
-
-        # Robots turn!
-        # Even if Agent dies, complete step for possible pyhrric reward.
-        robot = 0
-        robot_del = list()
         a_pos = self.game_state["agent"]
 
-        # Iterate through robots moving and assessing.
-        while robot < len(self.game_state["robots"]):
-            r_pos = self.game_state["robots"][robot]
+        # Assess agent move - did it run into a boundary, zapper or robot?
+        if a_pos[0] in [0, 19]:
+            # Ran into boundary
+            terminated = True
+        elif a_pos[1] in [0, 19]:
+            # Ran into boundary
+            terminated = True
+        elif any([(a_pos == z).all() for z in self.game_state["zappers"].values()]):
+            # "Ran into zapper"
+            terminated = True
+        elif any(
+            [(a_pos == r["location"]).all() for r in self.game_state["robots"].values()]
+        ):
+            terminated = True
 
-            # Which way to the agent?
-            tar_x = a_pos[0] - r_pos[0]
-            tar_y = a_pos[1] - r_pos[1]
+        # Even if Agent dies, complete step for possible pyhrric reward.
 
-            if abs(tar_x) == abs(tar_y):
-                r_move = np.array([np.sign(tar_x), np.sign(tar_y)])
-            elif abs(tar_x) > abs(tar_y):
-                r_move = np.array([np.sign(tar_x), 0])
-            else:
-                r_move = np.array([0, np.sign(tar_y)])
+        # # Iterate through robots moving and assessing.
+        for robot in self.game_state["robots"].values():
+            if robot["alive"]:
+                r_pos = robot["location"]
 
-            # Commit move if not moving onto another robot.
-            r_clash = r_pos + r_move
+                # Which way to the agent?
+                tar_x = a_pos[0] - r_pos[0]
+                tar_y = a_pos[1] - r_pos[1]
 
-            if not (r_clash == self.game_state["robots"]).all(1).any():
-                r_pos += r_move
-                self.game_state["robots"][robot] = r_pos
+                if abs(tar_x) == abs(tar_y):
+                    r_move = np.array([np.sign(tar_x), np.sign(tar_y)])
+                elif abs(tar_x) > abs(tar_y):
+                    r_move = np.array([np.sign(tar_x), 0])
+                else:
+                    r_move = np.array([0, np.sign(tar_y)])
 
-            # Has robot caught the player?
-            if np.array_equal(r_pos, a_pos):
-                # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
-                terminated = True
+                # Commit move if not moving onto another robot.
+                r_clash = r_pos + r_move
 
-            # Check if robot has done something stupid.
-            r_zapped = False
-            if r_pos[0] in [0, 19]:
-                r_zapped = True
-            elif r_pos[1] in [0, 19]:
-                r_zapped = True
-            elif (r_pos == self.game_state["zappers"]).all(1).any():
-                r_zapped = True
+                if not any(
+                    [
+                        (r_clash == r["location"]).all() and r["alive"]
+                        for r in self.game_state["robots"].values()
+                    ]
+                ):
+                    r_pos += r_move
+                    robot["location"] = r_pos
 
-            if r_zapped:
-                # ZZZAAAAPPPPP!!!! - Fried robot.
-                robot_del.append(True)
-                r += 1
-            else:
-                robot_del.append(False)
+                # Has robot caught the player?
+                if np.array_equal(r_pos, a_pos):
+                    # ZZZAAAAPPPPP!!!! - Agent caught by Robot.
+                    terminated = True
 
-            robot += 1
+                # Check if robot has done something stupid.
+                r_zapped = False
+                if r_pos[0] in [0, 19]:
+                    r_zapped = True
+                elif r_pos[1] in [0, 19]:
+                    r_zapped = True
+                elif any(
+                    [(r_pos == z).all() for z in self.game_state["zappers"].values()]
+                ):
+                    r_zapped = True
+
+                if r_zapped:
+                    # ZZZAAAAPPPPP!!!! - Fried robot.
+                    robot["alive"] = 0
+                    r += 1
 
         # If the episode has been terminated then we know if the agent has
         # been eliminated by moving into a zapper or robot, or the agent
@@ -222,11 +244,8 @@ class ChaseEnv(gym.Env):
         if terminated:
             r -= 1
 
-        # Clean out eliminated robots.
-        self.game_state["robots"] = np.delete(self.game_state["robots"], robot_del, 0)
-
-        # All robots eliminated? Game over!
-        if len(self.game_state["robots"]) == 0:
+        # TODO: All robots eliminated? Game over!
+        if sum(r["alive"] for r in self.game_state["robots"].values()) == 0:
             terminated = True
 
         observation = self.game_state
@@ -265,9 +284,9 @@ class ChaseEnv(gym.Env):
         # Plug in the positions of the agent, robots and zappers.
         a = self.game_state["agent"]
         arena[a[0]][a[1]] = "A"
-        for r in self.game_state["robots"]:
-            arena[r[0]][r[1]] = "R"
-        for z in self.game_state["zappers"]:
+        for r in self.game_state["robots"].values():
+            arena[r["location"][0]][r["location"][1]] = "R"
+        for z in self.game_state["zappers"].values():
             arena[z[0]][z[1]] = "X"
         output = "\n".join(["  ".join([col for col in row]) for row in arena])
 

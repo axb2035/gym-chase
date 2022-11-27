@@ -118,7 +118,6 @@ above). Gerneated using v0 of the environment.
 
 ## Todo / Future expansion
 
-- Address env_checker warnings.
 - Remove human agent from `chase_play` repo and make the env work with 
 `play(gymnasium.make('gym_chase:Chase-v1'))`.
 - Make everything more 'gymthonic'.
