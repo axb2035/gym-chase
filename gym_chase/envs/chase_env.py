@@ -1,6 +1,7 @@
 """Gymnasium gym-chase toy_text environment."""
 import random
 import sys
+from typing import Optional, Tuple
 
 import gymnasium as gym
 import numpy as np
@@ -18,10 +19,10 @@ class ChaseEnv(gym.Env):
     The arena is a 20x20 arena surrounded by high voltage zappers. Ten random
     zappers are also distributed around the arena. If the agent moves into
     a zapper (either by moving to an outside edge of arena or into a free
-    standing one) it is eliminated and the epsisode ends.
+    standing one) it is eliminated and the episode ends.
 
-    Each step an agent can move horiziontally one square, vertically one
-    square, a combination of one vertcal and horiziontal square or not move.
+    Each step an agent can move horizontally one square, vertically one
+    square, a combination of one vertical and horizontal square or not move.
     This gives the agent nine possible actions per step.
 
     Besides the zappers there are also five robots which move towards the
@@ -77,7 +78,7 @@ class ChaseEnv(gym.Env):
 
     metadata = {"render_modes": ["human"], "render_fps": 1}
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode: Optional[str] = None) -> None:
         """Setup action and observation spaces, default keymap and arena size."""
         self.render_mode = render_mode
         self.size = 20
@@ -119,11 +120,11 @@ class ChaseEnv(gym.Env):
             9: np.array([-1, 1]),
         }
 
-    def get_keys_to_action(self):
+    def get_keys_to_action(self) -> Dict:
         """Return default keymap for chase."""
         return self.action_to_direction
 
-    def _generate_arena(self, random_seed=0):
+    def _generate_arena(self, random_seed: Optional[int] = 0) -> np.ndarray:
         """Generates a random valid map.
 
         Args:
@@ -161,8 +162,8 @@ class ChaseEnv(gym.Env):
 
         return {"agent": agent_pos, "robots": robot_list, "zappers": zapper_list}
 
-    def step(self, action):
-        """Move agent based on feedback, move robots in response and assess outcomes."""
+    def step(self, action: int) -> Tuple[Dict, int, bool, bool, Dict]:
+        """Move agent based on action, move robots in response and assess outcomes."""
         r = 0
         terminated = False
         # Episodes are never truncated. Unless there is a wrapper with a timer.
@@ -187,7 +188,7 @@ class ChaseEnv(gym.Env):
         ):
             terminated = True
 
-        # Even if Agent dies, complete step for possible pyhrric reward.
+        # Even if Agent dies, complete step for possible pyrrhic reward.
 
         # # Iterate through robots moving and assessing.
         for robot in self.game_state["robots"].values():
@@ -254,7 +255,11 @@ class ChaseEnv(gym.Env):
 
         return observation, r, terminated, truncated, info
 
-    def reset(self, seed=None, options=None):
+    def reset(
+        self,
+        seed: Optional[int] = None,
+        options: Optional[dict] = None,
+    ) -> Tuple[Dict, Dict]:
         """Returns a new arena based on random_seed."""
         self.game_state = self._generate_arena(random_seed=seed)
 
@@ -264,8 +269,8 @@ class ChaseEnv(gym.Env):
 
         return observation, info
 
-    def render(self):
-        """Returns a text representation of the observation space."""
+    def render(self) -> None:
+        """Outputs a text representation of the observation space."""
         outfile = sys.stdout
         arena = list()
 

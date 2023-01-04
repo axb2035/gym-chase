@@ -3,3 +3,4 @@
 *.png
 *.csv
 *.h5
+.vscode/settings.json
