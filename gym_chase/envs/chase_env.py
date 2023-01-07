@@ -109,20 +109,20 @@ class ChaseEnv(gym.Env):
         self.action_space = Discrete(9)
 
         self.action_to_direction = {
-            1: np.array([1, -1]),
-            2: np.array([1, 0]),
-            3: np.array([1, 1]),
-            4: np.array([0, -1]),
-            5: np.array([0, 0]),
-            6: np.array([0, 1]),
-            7: np.array([-1, -1]),
-            8: np.array([-1, 0]),
-            9: np.array([-1, 1]),
+            0: np.array([1, -1]),
+            1: np.array([1, 0]),
+            2: np.array([1, 1]),
+            3: np.array([0, -1]),
+            4: np.array([0, 0]),
+            5: np.array([0, 1]),
+            6: np.array([-1, -1]),
+            7: np.array([-1, 0]),
+            8: np.array([-1, 1]),
         }
 
     def get_keys_to_action(self) -> Dict:
         """Return default keymap for chase."""
-        return self.action_to_direction
+        return {key+1: value for key, value in self.action_to_direction.items()}
 
     def _generate_arena(self, random_seed: Optional[int] = 0) -> np.ndarray:
         """Generates a random valid map.
