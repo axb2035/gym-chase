@@ -122,7 +122,7 @@ class ChaseEnv(gym.Env):
 
     def get_keys_to_action(self) -> Dict:
         """Return default keymap for chase."""
-        return {key+1: value for key, value in self.action_to_direction.items()}
+        return {key + 1: value for key, value in self.action_to_direction.items()}
 
     def _generate_arena(self, random_seed: Optional[int] = 0) -> np.ndarray:
         """Generates a random valid map.
