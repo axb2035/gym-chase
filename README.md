@@ -1,6 +1,6 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/) 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![gymnasium](https://img.shields.io/badge/version-0.26.3-brightgreen.svg?label=gymnasium)](https://gymnasium.farama.org)
+[![gymnasium](https://img.shields.io/badge/version-0.27-brightgreen.svg?label=gymnasium)](https://gymnasium.farama.org)
 
 # gym-chase
 ## A toy text gymnasium environment based on Chase.
