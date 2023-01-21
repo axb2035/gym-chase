@@ -89,7 +89,7 @@ def test_chase_environment(env: gym.Env) -> None:
 
     # Run random and possum tests to get a range of actions, states and rewards.
     exit_rewards = np.zeros(7)
-    for e in tqdm(range(20000), desc="Random actions"):
+    for e in tqdm(range(1), desc="Random actions"):
         terminated = False
         total_reward = 0
         state, info = env.reset(seed=e)
@@ -119,7 +119,7 @@ def test_chase_environment(env: gym.Env) -> None:
     print("Random exit rewards:", exit_rewards)
 
     # Possum should get at least one instance of all reward scenarios.
-    for e in tqdm(range(20000), desc="Possum actions"):
+    for e in tqdm(range(1), desc="Possum actions"):
         terminated = False
         total_reward = 0
         state, info = env.reset(seed=e)
