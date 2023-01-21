@@ -26,10 +26,10 @@ type:
 The environment is a 20x20 arena surrounded by high voltage zappers. Ten 
 random zappers are also distributed around the arena. If the agent moves 
 into a zapper (either by moving to an outside edge of arena or into a free 
-standing one) it is eliminated and the epsisode ends.
+standing one) it is eliminated and the episode ends.
 
-Each step an agent can move horiziontally one square, vertically one 
-square, a combination of one vertcal and horiziontal square or not move.
+Each step an agent can move horizontally one square, vertically one 
+square, a combination of one vertical and horizontal square or not move.
 This gives the agent nine possible actions per step.
 
 ```
@@ -47,7 +47,7 @@ move into a zapper in an attempt to get closer to the agent.
 The agent is eliminated if a robot moves into the same square. If a robot 
 tries to move to a square which is occupied by another robot it will not move. 
 If the agent moves into a zapper the robots will still move completing the 
-'step' for a possible pyhrric reward.
+'step' for a possible pyrrhic reward.
 
 An example state looks like this:
 ```
@@ -112,7 +112,7 @@ env = gym.make("gym_chase:Chase-v1").unwrapped
 When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
 a different starting position:
-```
+```python
 env.reset(seed=101)
 ```
 It may be possible to get a never ending sequence of moves between the agent 
@@ -122,7 +122,7 @@ step ceiling on any agent to ensure episode will end.
 ## Performance tables
 The following are agents that you can benchmark against. The validation set for 
 non-human is for the first 10,000 arenas (to set a starting arena see notes 
-above). Gerneated using v0 of the environment.
+above). Generated using v0 of the environment.
 
 | Agent   | mean r  | % won (r=5) |
 | :-------|:-------:|:-----------:|
@@ -136,10 +136,10 @@ above). Gerneated using v0 of the environment.
 
 - Remove human agent from `chase_play` repo and make the env work with 
 `play(gymnasium.make('gym_chase:Chase-v1'))`.
-- Make everything more 'gymthonic'.
+- Make everything more 'gymnasiumthonic'.
 - Add render option `machine` to omit spaces used for padding on stdout.
 - Add `pygame` render option.
-- Create a different reward function to encourage elimanting the robots as
+- Create a different reward function to encourage eliminating the robots as
 quickly as possible.
 - Make the environment more 'stochastic' by adding option for some random 
 variation to the robots i.e. 0.1 chance of going to the left or right of the 
@@ -159,4 +159,4 @@ guaranteed escape plan!
 ## Thanks to
 - Eike and everyone at the Melbourne MLAI Bookclub for insightful feedback.
 - The original developers and maintainers of the original gym and new 
-gynamsium libraries. :)
+gymnasium libraries. :)
