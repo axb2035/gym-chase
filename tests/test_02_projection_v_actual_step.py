@@ -49,7 +49,7 @@ def test_chase_environment(env: gym.Env) -> None:
         env: An unwrapped instance of the gym_chase:Chase-v1 environment
     """
     # Set the number of episodes to run.
-    for e in tqdm(range(100), desc="Projection v actual episodes"):
+    for e in tqdm(range(1000), desc="Projection v actual episodes"):
         terminated = False
         initial_state, _ = env.reset(seed=e)
         initial_state_json = state_to_json(initial_state)
