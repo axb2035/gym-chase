@@ -170,7 +170,7 @@ class ChaseEnv(gym.Env):
         projected_state = copy.deepcopy(self.game_state)
         r = 0
         terminated = False
-        # Episodes are never truncated. Unless there is a wrapper with a timer.
+        # Episodes are never truncated. Unless there is a wrapper with a move timer.
         truncated = False
 
         # Move agent.
@@ -179,17 +179,17 @@ class ChaseEnv(gym.Env):
 
         # Assess agent move - did it run into a boundary, zapper or robot?
         if a_pos[0] in [0, 19]:
-            # Ran into boundary
+            # Ran into boundary.
             terminated = True
         elif a_pos[1] in [0, 19]:
-            # Ran into boundary
+            # Ran into boundary.
             terminated = True
         elif any([(a_pos == z).all() for z in self.game_state["zappers"].values()]):
-            # "Ran into zapper"
+            # Ran into zapper.
             terminated = True
         elif any(
             [(a_pos == r["location"]).all() for r in self.game_state["robots"].values()]
-        ):
+        ):  # Ran into robot.
             terminated = True
 
         # Even if Agent dies, complete step for possible pyrrhic reward.
@@ -249,7 +249,7 @@ class ChaseEnv(gym.Env):
         if terminated:
             r -= 1
 
-        # TODO: All robots eliminated? Game over!
+        # All robots eliminated? Game over!
         if sum(r["alive"] for r in self.game_state["robots"].values()) == 0:
             terminated = True
 
