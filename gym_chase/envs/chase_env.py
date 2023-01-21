@@ -283,8 +283,10 @@ class ChaseEnv(gym.Env):
 
         return observation, info
 
-    def render(self) -> None:
+    def render(self, render_state: Optional[Dict] = None) -> None:
         """Outputs a text representation of the observation space."""
+        if render_state is None:
+            render_state = self.game_state
         outfile = sys.stdout
         arena = list()
 
@@ -301,11 +303,11 @@ class ChaseEnv(gym.Env):
             arena.append(row)
 
         # Plug in the positions of the agent, robots and zappers.
-        a = self.game_state["agent"]
+        a = render_state["agent"]
         arena[a[0]][a[1]] = "A"
-        for r in self.game_state["robots"].values():
+        for r in render_state["robots"].values():
             arena[r["location"][0]][r["location"][1]] = "R"
-        for z in self.game_state["zappers"].values():
+        for z in render_state["zappers"].values():
             arena[z[0]][z[1]] = "X"
         output = "\n".join(["  ".join([col for col in row]) for row in arena])
 
