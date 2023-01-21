@@ -92,7 +92,22 @@ The agent receives a reward of 1 for each robot eliminated, -1 if the agent
 is eliminated and zero otherwise. The agent elimination penalty is only 
 applied once per step.
 
-## Notes
+## Projection feature.
+Most `gymnasium` environments advance the state when `step(action)` is called. A non-standard feature of gym-chase is the ability to request a projection of the future state based on an action, that will not advance the underlying state of the environment.
+
+To obtain a projected state call:
+```python
+env.step(action, project=True)
+```
+
+This allows for other types of agents to be tested, such as reflex agents that select the best outcome from available (s, a) pairs to determine which action to take. It will also allow for search algorithms such as MCTS to be used.
+
+By default, Gymnasium environments are wrapped by the `passiveEnvChecker` wrapper, which means that it will throw an error if you try to pass the project argument as the checker enforces a single argument for `step()`. To avoid this problem the unwrapped environment needs to be called when it is made with:
+```python
+env = gym.make("gym_chase:Chase-v1").unwrapped
+```
+
+## Other Notes
 
 When resetting the environment it will generate the same arena every time. If
 you want a different setup pass a value, such as the episode number to generate 
