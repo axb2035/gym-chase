@@ -310,3 +310,7 @@ class ChaseEnv(gym.Env):
         output = "\n".join(["  ".join([col for col in row]) for row in arena])
 
         outfile.write(output)
+
+    def get_state(self) -> Dict:
+        """Returns the current game state."""
+        return self.game_state
