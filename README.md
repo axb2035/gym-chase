@@ -122,13 +122,24 @@ step ceiling on any agent to ensure episode will end.
 ## Performance tables
 The following are agents that you can benchmark against. The validation set for 
 non-human is for the first 10,000 arenas (to set a starting arena see notes 
-above). Generated using v0 of the environment.
+above). Generated using v1 of the environment.
 
 | Agent   | mean r  | % won (r=5) |
 | :-------|:-------:|:-----------:|
 | Human<sup>1</sup>  |  4.11  	| 84.0%       |
+| Reflex03  | 1.3786 |  20.42%      |
+| Reflex02  | 1.4011 |  19.64%      |
+| Reflex01  | 1.1244 |  12.13%      |
 | Possum  | -0.3342 |  1.06%      |
 | Random  | -0.4257 |  0.08%      |
+
+The reflex agents assessed the (s, a) pairs and selected the highest value. Ties were broken randomly.
+
+Reflex01 used the `reward`. This leads to situation where there may be a tie between a move into a safe space and moving into a zapper (-1) and having a robot also follow in (+1).
+
+Reflex02 attempts to mitigate the issues of 01 by using `reward - terminating` value. Moves that cause the agent to die are now less valuable than moves that keep the agent alive. However, ties can still be caused, or in extreme cases the agent throwing itself into a zapper may have the highest value if two or more robots would be taken down with it!
+
+Reflex03 is the last of the sequence and uses `reward - (terminating * 5)` to ensure the agent will always chose a safe move over one that causes it to be eliminated.
 
 1. Based on first 100 arenas. I do have life outside of this project...
 
@@ -139,13 +150,14 @@ above). Generated using v0 of the environment.
 - Make everything more 'gymnasiumthonic'.
 - Add render option `machine` to omit spaces used for padding on stdout.
 - Add `pygame` render option.
-- Create a different reward function to encourage eliminating the robots as
-quickly as possible.
+- Create different reward function wrappers. 
+    - To encourage eliminating the robots as quickly as possible.
+    - To make the episode as long as possible ie. can the game go on forever.
 - Make the environment more 'stochastic' by adding option for some random 
 variation to the robots i.e. 0.1 chance of going to the left or right of the 
 'deterministic' move to close the gap on the agent.
 - Add option for zappers blocking line of sight (LOS) between agent and robots. 
-If robots lose LOS then they will not move or take a random move that doesn't
+If robots lose LOS to agent then they will not move or take a random move that doesn't
 take them into a zapper.
 - Add option for "fog" so the robots position is not exactly known until 
 closer to the Agent.
