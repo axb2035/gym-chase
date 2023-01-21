@@ -1,4 +1,5 @@
 """Gymnasium gym-chase toy_text environment."""
+import copy
 import random
 import sys
 from typing import Optional, Tuple
@@ -162,16 +163,19 @@ class ChaseEnv(gym.Env):
 
         return {"agent": agent_pos, "robots": robot_list, "zappers": zapper_list}
 
-    def step(self, action: int) -> Tuple[Dict, int, bool, bool, Dict]:
+    def step(
+        self, action: int, project: Optional[bool] = False
+    ) -> Tuple[Dict, int, bool, bool, Dict]:
         """Move agent based on action, move robots in response and assess outcomes."""
+        projected_state = copy.deepcopy(self.game_state)
         r = 0
         terminated = False
         # Episodes are never truncated. Unless there is a wrapper with a timer.
         truncated = False
 
         # Move agent.
-        self.game_state["agent"] += self.action_to_direction[action]
-        a_pos = self.game_state["agent"]
+        projected_state["agent"] += self.action_to_direction[action]
+        a_pos = projected_state["agent"]
 
         # Assess agent move - did it run into a boundary, zapper or robot?
         if a_pos[0] in [0, 19]:
@@ -191,7 +195,7 @@ class ChaseEnv(gym.Env):
         # Even if Agent dies, complete step for possible pyrrhic reward.
 
         # # Iterate through robots moving and assessing.
-        for robot in self.game_state["robots"].values():
+        for robot in projected_state["robots"].values():
             if robot["alive"]:
                 r_pos = robot["location"]
 
@@ -212,7 +216,7 @@ class ChaseEnv(gym.Env):
                 if not any(
                     [
                         (r_clash == r["location"]).all() and r["alive"]
-                        for r in self.game_state["robots"].values()
+                        for r in projected_state["robots"].values()
                     ]
                 ):
                     r_pos += r_move
@@ -230,7 +234,7 @@ class ChaseEnv(gym.Env):
                 elif r_pos[1] in [0, 19]:
                     r_zapped = True
                 elif any(
-                    [(r_pos == z).all() for z in self.game_state["zappers"].values()]
+                    [(r_pos == z).all() for z in projected_state["zappers"].values()]
                 ):
                     r_zapped = True
 
@@ -249,9 +253,19 @@ class ChaseEnv(gym.Env):
         if sum(r["alive"] for r in self.game_state["robots"].values()) == 0:
             terminated = True
 
-        observation = self.game_state
-        # TODO: Add info. For now return an empty dict.
-        info = {}
+        if not project:
+            # If the step is not a projection then update the game state.
+            # print("Updating real state.")
+            self.game_state = projected_state
+            observation = self.game_state
+        else:
+            # If the step is a projection then return the projected state.
+            # print("Projecting state.")
+            observation = projected_state
+
+        # print("Observation: ", observation["agent"], r)
+        # Indicate if the result is a projective state. i.e. it wasn't stepped forward.
+        info = {"project": project}
 
         return observation, r, terminated, truncated, info
 
